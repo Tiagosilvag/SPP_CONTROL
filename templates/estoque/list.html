@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header('bi-clipboard-data', 'Saldo em Estoque (Consumíveis)', subtitle='Calculado automaticamente a partir das Entradas e Movimentações de Consumíveis.') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-3">
+      <select class="form-select" name="alerta" onchange="this.form.submit()">
+        <option value="">Todos os status</option>
+        <option value="Crítico" {% if alerta=='Crítico' %}selected{% endif %}>Crítico</option>
+        <option value="Atenção" {% if alerta=='Atenção' %}selected{% endif %}>Atenção</option>
+        <option value="OK" {% if alerta=='OK' %}selected{% endif %}>OK</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr>
+      <th>Material</th><th>Categoria</th><th>Secretaria</th><th>Entradas</th><th>Consumido</th><th>Emprestado</th><th>Disponível</th><th>Mínimo</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in linhas %}
+    <tr>
+      <td>{{ l.material_nome }}</td>
+      <td>{{ l.categoria or '-' }}</td>
+      <td>{{ l.secretaria_sigla or '-' }}</td>
+      <td>{{ l.total_entradas|round(2) }}</td>
+      <td>{{ l.total_consumido|round(2) }}</td>
+      <td>{{ l.total_emprestado|round(2) }}</td>
+      <td><strong>{{ l.estoque_disponivel|round(2) }}</strong> {{ l.unidade_medida }}</td>
+      <td>{{ l.estoque_minimo|round(2) }}</td>
+      <td>
+        <span class="badge {{ 'badge-critico' if l.status_alerta=='Crítico' else ('badge-atencao' if l.status_alerta=='Atenção' else 'badge-ok') }}">{{ l.status_alerta }}</span>
+      </td>
+    </tr>
+    {% else %}
+    {{ empty_row(9, 'Nenhum registro de estoque encontrado.', 'bi-clipboard-data') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

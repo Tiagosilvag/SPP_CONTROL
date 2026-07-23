@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, form_actions %}
+{% block content %}
+{{ page_header('bi-tools', ('Editar Bem Patrimonial' if p else 'Novo Bem Patrimonial')) }}
+
+<form method="post" class="surface-card form-card p-4">
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Nº Patrimônio</label>
+      <input type="text" class="form-control" name="num_patrimonio" required placeholder="Ex: SPP-2026-0001" value="{{ p.num_patrimonio if p else '' }}">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Material / Equipamento</label>
+      <select class="form-select" name="material_id" required>
+        <option value="">Selecione...</option>
+        {% for m in materiais %}
+        <option value="{{ m.id }}" {% if p and p.material_id==m.id %}selected{% endif %}>{{ m.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Secretaria Proprietária</label>
+      <select class="form-select" name="secretaria_proprietaria_id">
+        <option value="">Selecione...</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if p and p.secretaria_proprietaria_id==s.id %}selected{% endif %}>{{ s.sigla }} - {{ s.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Unidade Atual</label>
+      <select class="form-select" name="unidade_atual_id">
+        <option value="">Selecione...</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}" {% if p and p.unidade_atual_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Data de Aquisição</label>
+      <input type="date" class="form-control" name="data_aquisicao" value="{{ p.data_aquisicao if p and p.data_aquisicao else '' }}">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Estado de Conservação</label>
+      <select class="form-select" name="estado_conservacao">
+        {% for e in estados %}
+        <option value="{{ e }}" {% if p and p.estado_conservacao==e %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Status</label>
+      <select class="form-select" name="status">
+        {% for st in status_list %}
+        <option value="{{ st }}" {% if p and p.status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Observações</label>
+    <textarea class="form-control" name="observacoes" rows="3">{{ p.observacoes if p else '' }}</textarea>
+  </div>
+  {{ form_actions(url_for('patrimonio.listar')) }}
+</form>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% block content %}
+{{ page_header('bi-cone-striped', 'Obras', action_url=url_for('obras.nova'), action_label='Nova Obra') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-3">
+      <select class="form-select" name="status" onchange="this.form.submit()">
+        <option value="">Todos os status</option>
+        <option value="Em Andamento" {% if status=='Em Andamento' %}selected{% endif %}>Em Andamento</option>
+        <option value="Concluída" {% if status=='Concluída' %}selected{% endif %}>Concluída</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Descrição</th><th>Secretaria</th><th>Unidade</th><th>Início</th><th>Previsão Término</th><th>Status</th><th>Fiscal</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for o in obras %}
+    <tr>
+      <td>{{ o.descricao }}</td>
+      <td>{{ o.secretaria_sigla or '-' }}</td>
+      <td>{{ o.unidade_nome or '-' }}</td>
+      <td>{{ o.data_inicio|brdate }}</td>
+      <td>{{ o.previsao_termino|brdate }}</td>
+      <td><span class="badge {{ 'badge-soft-success' if o.status=='Concluída' else 'badge-soft-warning' }}">{{ o.status }}</span></td>
+      <td>{{ o.fiscal_responsavel or '-' }}</td>
+      <td>{{ row_actions(url_for('obras.editar', id=o.id), url_for('obras.excluir', id=o.id), 'Confirma a exclusão desta obra?') }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(8, 'Nenhuma obra cadastrada.', 'bi-cone-striped') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

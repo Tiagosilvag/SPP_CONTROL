@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, form_actions %}
+{% block content %}
+{{ page_header('bi-truck', ('Editar Fornecedor' if fornecedor else 'Novo Fornecedor')) }}
+
+<form method="post" class="surface-card form-card p-4">
+  <div class="mb-3">
+    <label class="form-label">Nome</label>
+    <input type="text" class="form-control" name="nome" required value="{{ fornecedor.nome if fornecedor else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">CNPJ</label>
+    <input type="text" class="form-control" name="cnpj" value="{{ fornecedor.cnpj if fornecedor else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Contato</label>
+    <input type="text" class="form-control" name="contato" value="{{ fornecedor.contato if fornecedor else '' }}">
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="ativo" id="ativo" {% if not fornecedor or fornecedor.ativo %}checked{% endif %}>
+    <label class="form-check-label" for="ativo">Fornecedor ativo</label>
+  </div>
+  {{ form_actions(url_for('fornecedores.listar')) }}
+</form>
+{% endblock %}

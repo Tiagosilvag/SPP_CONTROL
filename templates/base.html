@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14151f">
+<title>{% block title %}{{ sistema_nome }}{% endblock %}</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+<script>
+  (function () {
+    var stored = localStorage.getItem('spp-theme');
+    var dark = stored ? stored === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+  })();
+</script>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+{% set nav_map = {
+  'dashboard': {'section': none, 'label': 'Dashboard'},
+  'secretarias': {'section': 'Estrutura', 'label': 'Secretarias'},
+  'unidades': {'section': 'Estrutura', 'label': 'Unidades'},
+  'materiais': {'section': 'Cadastros', 'label': 'Materiais'},
+  'fornecedores': {'section': 'Cadastros', 'label': 'Fornecedores'},
+  'obras': {'section': 'Cadastros', 'label': 'Obras'},
+  'entradas': {'section': 'Estoque', 'label': 'Entradas de Estoque'},
+  'mov_consumiveis': {'section': 'Estoque', 'label': 'Movimentações (Consumíveis)'},
+  'estoque': {'section': 'Estoque', 'label': 'Saldo em Estoque'},
+  'patrimonio': {'section': 'Patrimônio', 'label': 'Bens Patrimoniais'},
+  'mov_patrimonio': {'section': 'Patrimônio', 'label': 'Movimentações (Patrimônio)'},
+  'cotacoes': {'section': none, 'label': 'Cotações'},
+} %}
+{% set current_nav = nav_map.get(request.blueprint, {'section': none, 'label': sistema_nome}) %}
+{% set is_cotacoes = request.blueprint == 'cotacoes' %}
+{% set module_label = 'Cotação x Projeto' if is_cotacoes else 'Materiais e Patrimônio' %}
+{% set module_icon = 'bi-graph-up-arrow' if is_cotacoes else 'bi-shield-lock-fill' %}
+{% set module_home = url_for('cotacoes.listar') if is_cotacoes else url_for('dashboard.index') %}
+
+<div class="app-shell">
+  <div class="sidebar-backdrop"></div>
+
+  <nav class="sidebar">
+    <a href="{{ module_home }}" class="sidebar-brand">
+      <span class="sidebar-brand-icon"><i class="bi {{ module_icon }}"></i></span>
+      <span>
+        <span class="sidebar-brand-text d-block">SPP - Control</span>
+        <span class="sidebar-brand-sub">{{ module_label }}</span>
+      </span>
+    </a>
+
+    <div class="sidebar-nav">
+      {% if is_cotacoes %}
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="{{ url_for('cotacoes.listar') }}" class="nav-link active"><i class="bi bi-graph-up-arrow"></i>Cotações</a></li>
+      </ul>
+      {% else %}
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.blueprint=='dashboard' }}"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
+
+        <li><span class="nav-section-title">Estrutura</span></li>
+        <li class="nav-item"><a href="{{ url_for('secretarias.listar') }}" class="nav-link {{ 'active' if request.blueprint=='secretarias' }}"><i class="bi bi-building"></i>Secretarias</a></li>
+        <li class="nav-item"><a href="{{ url_for('unidades.listar') }}" class="nav-link {{ 'active' if request.blueprint=='unidades' }}"><i class="bi bi-geo-alt"></i>Unidades</a></li>
+
+        <li><span class="nav-section-title">Cadastros</span></li>
+        <li class="nav-item"><a href="{{ url_for('materiais.listar') }}" class="nav-link {{ 'active' if request.blueprint=='materiais' }}"><i class="bi bi-box-seam"></i>Materiais</a></li>
+        <li class="nav-item"><a href="{{ url_for('fornecedores.listar') }}" class="nav-link {{ 'active' if request.blueprint=='fornecedores' }}"><i class="bi bi-truck"></i>Fornecedores</a></li>
+        <li class="nav-item"><a href="{{ url_for('obras.listar') }}" class="nav-link {{ 'active' if request.blueprint=='obras' }}"><i class="bi bi-cone-striped"></i>Obras</a></li>
+
+        <li><span class="nav-section-title">Estoque</span></li>
+        <li class="nav-item"><a href="{{ url_for('entradas.listar') }}" class="nav-link {{ 'active' if request.blueprint=='entradas' }}"><i class="bi bi-box-arrow-in-down"></i>Entradas</a></li>
+        <li class="nav-item"><a href="{{ url_for('mov_consumiveis.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_consumiveis' }}"><i class="bi bi-arrow-left-right"></i>Movimentações (Consumíveis)</a></li>
+        <li class="nav-item"><a href="{{ url_for('estoque.listar') }}" class="nav-link {{ 'active' if request.blueprint=='estoque' }}"><i class="bi bi-clipboard-data"></i>Saldo em Estoque</a></li>
+
+        <li><span class="nav-section-title">Patrimônio</span></li>
+        <li class="nav-item"><a href="{{ url_for('patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='patrimonio' }}"><i class="bi bi-tools"></i>Bens Patrimoniais</a></li>
+        <li class="nav-item"><a href="{{ url_for('mov_patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_patrimonio' }}"><i class="bi bi-arrow-repeat"></i>Movimentações (Patrimônio)</a></li>
+      </ul>
+      {% endif %}
+    </div>
+
+    <div class="sidebar-footer">SPP - Control &copy; {{ 2026 }}</div>
+  </nav>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button type="button" class="sidebar-toggle" data-sidebar-toggle aria-label="Abrir menu">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+
+      <nav class="breadcrumb-trail" aria-label="breadcrumb">
+        <a href="{{ url_for('home.index') }}"><i class="bi bi-house"></i></a>
+        <i class="bi bi-chevron-right"></i>
+        <a href="{{ module_home }}">{{ module_label }}</a>
+        {% if current_nav.section %}
+          <i class="bi bi-chevron-right"></i>
+          <span>{{ current_nav.section }}</span>
+        {% endif %}
+        <i class="bi bi-chevron-right"></i>
+        <span class="crumb-current">{{ current_nav.label }}</span>
+      </nav>
+
+      <div class="topbar-actions">
+        <span class="topbar-date d-none d-md-flex"><i class="bi bi-calendar3"></i>{{ hoje|brdate }}</span>
+        <a href="{{ url_for('home.index') }}" class="icon-btn" aria-label="Selecionar módulo" title="Selecionar módulo">
+          <i class="bi bi-grid-3x3-gap-fill"></i>
+        </a>
+        <button type="button" class="icon-btn" data-theme-toggle aria-label="Alternar tema" title="Alternar tema claro/escuro">
+          <i class="bi bi-moon-stars"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="alert-stack">
+          {% for category, message in messages %}
+            {% set icon = {'success': 'bi-check-circle-fill', 'danger': 'bi-exclamation-triangle-fill', 'warning': 'bi-exclamation-circle-fill', 'info': 'bi-info-circle-fill'}.get(category, 'bi-info-circle-fill') %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              <i class="bi {{ icon }}"></i>
+              <div class="flex-grow-1">{{ message }}</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Confirmar ação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" data-confirm-body>Tem certeza que deseja continuar?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-confirm-accept>Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

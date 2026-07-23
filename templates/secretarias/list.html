@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% block content %}
+{{ page_header('bi-building', 'Secretarias', action_url=url_for('secretarias.nova'), action_label='Nova Secretaria') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Buscar por nome ou sigla...">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Buscar</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Sigla</th><th>Nome</th><th>Responsável</th><th>Contato</th><th>Status</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for s in secretarias %}
+    <tr>
+      <td><strong>{{ s.sigla }}</strong></td>
+      <td>{{ s.nome }}</td>
+      <td>{{ s.responsavel or '-' }}</td>
+      <td>{{ s.contato or '-' }}</td>
+      <td>
+        {% if s.ativa %}<span class="badge badge-soft-success">Ativa</span>{% else %}<span class="badge badge-soft-neutral">Inativa</span>{% endif %}
+      </td>
+      <td>{{ row_actions(url_for('secretarias.editar', id=s.id), url_for('secretarias.excluir', id=s.id), 'Confirma a exclusão da secretaria ' ~ s.sigla ~ '?') }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(6, 'Nenhuma secretaria cadastrada.', 'bi-building') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

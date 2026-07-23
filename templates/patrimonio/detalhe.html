@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_row %}
+{% block content %}
+<div class="page-header">
+  <div class="d-flex align-items-start gap-3">
+    <span class="page-header-icon"><i class="bi bi-tools"></i></span>
+    <div>
+      <h1 class="page-title">{{ p.num_patrimonio }}</h1>
+      <div class="page-subtitle">{{ p.material_nome }}</div>
+    </div>
+  </div>
+  <a href="{{ url_for('patrimonio.listar') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<div class="panel mb-4">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="stat-label">Material</div>
+      <div class="fw-semibold">{{ p.material_nome }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Secretaria</div>
+      <div class="fw-semibold">{{ p.secretaria_sigla or '-' }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Unidade Atual</div>
+      <div class="fw-semibold">{{ p.unidade_nome or '-' }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Estado</div>
+      <div class="fw-semibold">{{ p.estado_conservacao }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Status</div>
+      <div><span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger'}.get(p.status, 'badge-soft-neutral') }}">{{ p.status }}</span></div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Aquisição</div>
+      <div class="fw-semibold">{{ p.data_aquisicao|brdate }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-title"><i class="bi bi-clock-history"></i> Histórico de Movimentações</div>
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Data</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Prev. Devolução</th><th>Devolvido em</th><th>Status</th><th>Responsável</th></tr>
+  </thead>
+  <tbody>
+    {% for m in historico %}
+    <tr>
+      <td>{{ m.data_movimentacao|brdate }}</td>
+      <td>{{ m.tipo_movimentacao }}</td>
+      <td>{{ m.unidade_origem_nome or '-' }}</td>
+      <td>{{ m.unidade_destino_nome or '-' }}</td>
+      <td>{{ m.data_prev_devolucao|brdate }}</td>
+      <td>{{ m.data_real_devolucao|brdate }}</td>
+      <td>{{ m.status_devolucao }}</td>
+      <td>{{ m.responsavel or '-' }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(8, 'Nenhuma movimentação registrada para este bem.', 'bi-clock-history') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, form_actions %}
+{% block content %}
+{{ page_header('bi-box-arrow-in-down', 'Nova Entrada de Estoque') }}
+
+<form method="post" class="surface-card form-card p-4">
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Data da Entrada</label>
+      <input type="date" class="form-control" name="data_entrada" value="{{ hoje }}">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Material Consumível</label>
+      <select class="form-select" name="material_id" required>
+        <option value="">Selecione...</option>
+        {% for m in materiais %}
+        <option value="{{ m.id }}">{{ m.nome }} ({{ m.unidade_medida }})</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Secretaria Proprietária</label>
+      <select class="form-select" name="secretaria_proprietaria_id" required>
+        <option value="">Selecione...</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}">{{ s.sigla }} - {{ s.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Unidade de Destino</label>
+      <select class="form-select" name="unidade_destino_id">
+        <option value="">Selecione...</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}">{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Quantidade</label>
+      <input type="number" step="0.01" min="0.01" class="form-control" name="quantidade" required>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Fornecedor</label>
+      <select class="form-select" name="fornecedor_id">
+        <option value="">Selecione...</option>
+        {% for f in fornecedores %}
+        <option value="{{ f.id }}">{{ f.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Nota Fiscal</label>
+      <input type="text" class="form-control" name="nota_fiscal">
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Obra (opcional)</label>
+    <select class="form-select" name="obra_id">
+      <option value="">Nenhuma</option>
+      {% for o in obras %}
+      <option value="{{ o.id }}">{{ o.descricao }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Observações</label>
+    <textarea class="form-control" name="observacoes" rows="2"></textarea>
+  </div>
+  {{ form_actions(url_for('entradas.listar'), 'Registrar Entrada') }}
+</form>
+{% endblock %}

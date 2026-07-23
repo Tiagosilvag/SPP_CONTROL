@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header('bi-box-arrow-in-down', 'Entradas de Estoque', action_url=url_for('entradas.nova'), action_label='Nova Entrada') }}
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Data</th><th>Material</th><th>Qtd.</th><th>Secretaria</th><th>Unidade Destino</th><th>Fornecedor</th><th>Nota Fiscal</th><th>Obra</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for e in entradas %}
+    <tr>
+      <td>{{ e.data_entrada|brdate }}</td>
+      <td>{{ e.material_nome }}</td>
+      <td>{{ e.quantidade|round(2) }} {{ e.unidade_medida }}</td>
+      <td>{{ e.secretaria_sigla or '-' }}</td>
+      <td>{{ e.unidade_nome or '-' }}</td>
+      <td>{{ e.fornecedor_nome or '-' }}</td>
+      <td>{{ e.nota_fiscal or '-' }}</td>
+      <td>{{ e.obra_descricao or '-' }}</td>
+      <td>
+        <div class="row-actions">
+          <form action="{{ url_for('entradas.excluir', id=e.id) }}" method="post" data-confirm="Confirma a exclusão desta entrada?">
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    {{ empty_row(9, 'Nenhuma entrada registrada.', 'bi-box-arrow-in-down') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

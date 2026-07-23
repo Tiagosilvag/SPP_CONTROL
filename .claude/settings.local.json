@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"editar secretaria: %{http_code}\\\\n\" \"http://localhost:5000/secretarias/1/editar\")",
+      "Bash(curl -s -o /dev/null -w \"detalhe patrimonio 1: %{http_code}\\\\n\" \"http://localhost:5000/patrimonio/1\")",
+      "Bash(curl -s -o /dev/null -w \"editar patrimonio 1: %{http_code}\\\\n\" \"http://localhost:5000/patrimonio/1/editar\")",
+      "Bash(py -c \"import playwright\")",
+      "Bash(py -m playwright --version)",
+      "PowerShell(Get-Command chromium-cli -ErrorAction SilentlyContinue; Get-Command msedge -ErrorAction SilentlyContinue; Get-Command chrome -ErrorAction SilentlyContinue; Test-Path \"$env:ProgramFiles\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"; Test-Path \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\")",
+      "PowerShell(py -m pip install --quiet playwright 2>&1)",
+      "PowerShell(py -m playwright install chromium 2>&1)",
+      "Bash(py \"/c/Users/Admin/AppData/Local/Temp/claude/c--spp-control/6010b3be-b506-42c7-9645-6174f0dc3503/scratchpad/shot.py\")"
+    ]
+  }
+}

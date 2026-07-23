@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% block content %}
+{{ page_header('bi-geo-alt', 'Unidades', action_url=url_for('unidades.nova'), action_label='Nova Unidade') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <select class="form-select" name="secretaria_id" onchange="this.form.submit()">
+        <option value="">Todas as secretarias</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if secretaria_id==s.id %}selected{% endif %}>{{ s.sigla }} - {{ s.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Nome</th><th>Secretaria</th><th>Endereço</th><th>Responsável Local</th><th>Status</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for u in unidades %}
+    <tr>
+      <td>{{ u.nome }}</td>
+      <td>{{ u.secretaria_sigla or '-' }}</td>
+      <td>{{ u.endereco or '-' }}</td>
+      <td>{{ u.responsavel_local or '-' }}</td>
+      <td>{% if u.ativa %}<span class="badge badge-soft-success">Ativa</span>{% else %}<span class="badge badge-soft-neutral">Inativa</span>{% endif %}</td>
+      <td>{{ row_actions(url_for('unidades.editar', id=u.id), url_for('unidades.excluir', id=u.id), 'Confirma a exclusão da unidade ' ~ u.nome ~ '?') }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(6, 'Nenhuma unidade cadastrada.', 'bi-geo-alt') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

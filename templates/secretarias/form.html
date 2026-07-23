@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, form_actions %}
+{% block content %}
+{{ page_header('bi-building', ('Editar Secretaria' if secretaria else 'Nova Secretaria')) }}
+
+<form method="post" class="surface-card form-card p-4">
+  <div class="mb-3">
+    <label class="form-label">Nome</label>
+    <input type="text" class="form-control" name="nome" required value="{{ secretaria.nome if secretaria else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Sigla</label>
+    <input type="text" class="form-control" name="sigla" required value="{{ secretaria.sigla if secretaria else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Responsável</label>
+    <input type="text" class="form-control" name="responsavel" value="{{ secretaria.responsavel if secretaria else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Contato</label>
+    <input type="text" class="form-control" name="contato" value="{{ secretaria.contato if secretaria else '' }}">
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="ativa" id="ativa" {% if not secretaria or secretaria.ativa %}checked{% endif %}>
+    <label class="form-check-label" for="ativa">Secretaria ativa</label>
+  </div>
+  {{ form_actions(url_for('secretarias.listar')) }}
+</form>
+{% endblock %}

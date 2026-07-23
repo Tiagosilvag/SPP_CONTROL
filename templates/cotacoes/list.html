@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% block content %}
+{{ page_header('bi-graph-up-arrow', 'Cotação x Projeto', subtitle='Compare o valor de mercado cotado com a economia obtida em cada projeto.', action_url=url_for('cotacoes.nova'), action_label='Nova Cotação') }}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div>
+          <div class="stat-label">Total Cotado</div>
+          <div class="stat-value">R$ {{ '%.2f'|format(resumo.total_cotado) }}</div>
+        </div>
+        <span class="stat-icon badge-soft-info"><i class="bi bi-tag"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div>
+          <div class="stat-label">Total Economizado</div>
+          <div class="stat-value">R$ {{ '%.2f'|format(resumo.total_economizado) }}</div>
+        </div>
+        <span class="stat-icon badge-soft-neutral"><i class="bi bi-piggy-bank"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div>
+          <div class="stat-label">Economia Total</div>
+          <div class="stat-value {{ 'text-success' if resumo.total_diferenca >= 0 else 'text-danger' }}">R$ {{ '%.2f'|format(resumo.total_diferenca) }}</div>
+        </div>
+        <span class="stat-icon badge-soft-success"><i class="bi bi-graph-up-arrow"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div>
+          <div class="stat-label">% de Economia</div>
+          <div class="stat-value {{ 'text-success' if resumo.percentual_geral >= 0 else 'text-danger' }}">{{ '%.1f'|format(resumo.percentual_geral) }}%</div>
+        </div>
+        <span class="stat-icon badge-soft-warning"><i class="bi bi-percent"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Buscar por descrição...">
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Todas as obras</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if obra_id==o.id %}selected{% endif %}>{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Buscar</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr>
+      <th>Data</th><th>Obra</th><th>Descrição</th><th>Fornecedor</th><th>Valor Cotado</th><th>Economizado</th><th>Economia</th><th class="text-end">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in cotacoes %}
+    <tr>
+      <td>{{ c.data_cotacao|brdate }}</td>
+      <td>{{ c.obra_descricao }}</td>
+      <td>{{ c.descricao }}</td>
+      <td>{{ c.fornecedor_nome or '-' }}</td>
+      <td>R$ {{ '%.2f'|format(c.valor_cotado) }}</td>
+      <td>R$ {{ '%.2f'|format(c.valor_economizado) }}</td>
+      <td>
+        <span class="badge {{ 'badge-soft-success' if c.diferenca >= 0 else 'badge-soft-danger' }}">
+          R$ {{ '%.2f'|format(c.diferenca) }} ({{ '%.1f'|format(c.percentual_economia) }}%)
+        </span>
+      </td>
+      <td>{{ row_actions(url_for('cotacoes.editar', id=c.id), url_for('cotacoes.excluir', id=c.id), 'Confirma a exclusão desta cotação?') }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(8, 'Nenhuma cotação cadastrada.', 'bi-graph-up-arrow') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

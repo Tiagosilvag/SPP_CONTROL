@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header('bi-arrow-left-right', 'Movimentações de Consumíveis', action_url=url_for('mov_consumiveis.nova'), action_label='Nova Movimentação') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-3">
+      <select class="form-select" name="tipo" onchange="this.form.submit()">
+        <option value="">Todos os tipos</option>
+        {% for t in tipos %}
+        <option value="{{ t }}" {% if tipo==t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Data</th><th>Tipo</th><th>Material</th><th>Qtd.</th><th>Origem</th><th>Destino</th><th>Obra</th><th>Status</th><th>Responsável</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for m in movs %}
+    <tr>
+      <td>{{ m.data_movimentacao|brdate }}</td>
+      <td>{{ m.tipo_movimentacao }}</td>
+      <td>{{ m.material_nome }}</td>
+      <td>{{ m.quantidade|round(2) }}</td>
+      <td>{{ m.unidade_origem_nome or '-' }}</td>
+      <td>{{ m.unidade_destino_nome or '-' }}</td>
+      <td>{{ m.obra_descricao or '-' }}</td>
+      <td>
+        {% if m.status_devolucao != '—' %}
+        <span class="badge {{ 'badge-soft-danger' if m.status_devolucao=='Em Atraso' else ('badge-soft-success' if m.status_devolucao=='Devolvido' else 'badge-soft-warning') }}">{{ m.status_devolucao }}</span>
+        {% else %}-{% endif %}
+      </td>
+      <td>{{ m.responsavel or '-' }}</td>
+      <td>
+        <div class="row-actions">
+          <form action="{{ url_for('mov_consumiveis.excluir', id=m.id) }}" method="post" data-confirm="Confirma a exclusão desta movimentação?">
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    {{ empty_row(10, 'Nenhuma movimentação registrada.', 'bi-arrow-left-right') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

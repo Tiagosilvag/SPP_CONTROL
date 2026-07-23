@@ -1,0 +1,50 @@
+{# Reusable Jinja2 components shared across pages. Presentational only — no business logic. #}
+
+{% macro page_header(icon, title, subtitle=None, action_url=None, action_label=None, action_icon='bi-plus-lg') %}
+<div class="page-header">
+  <div class="d-flex align-items-start gap-3">
+    <span class="page-header-icon"><i class="bi {{ icon }}"></i></span>
+    <div>
+      <h1 class="page-title">{{ title }}</h1>
+      {% if subtitle %}<div class="page-subtitle">{{ subtitle }}</div>{% endif %}
+    </div>
+  </div>
+  {% if action_url %}
+  <a href="{{ action_url }}" class="btn btn-primary"><i class="bi {{ action_icon }}"></i> {{ action_label }}</a>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro row_actions(edit_url=None, delete_url=None, delete_message='Confirma a exclusão deste registro?') %}
+<div class="row-actions">
+  {% if edit_url %}
+  <a href="{{ edit_url }}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+  {% endif %}
+  {% if delete_url %}
+  <form action="{{ delete_url }}" method="post" data-confirm="{{ delete_message }}">
+    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+  </form>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro empty_row(colspan, text='Nenhum registro encontrado.', icon='bi-inbox') %}
+<tr>
+  <td colspan="{{ colspan }}">
+    <div class="empty-state">
+      <i class="bi {{ icon }}"></i>
+      <div class="empty-state-title">{{ text }}</div>
+    </div>
+  </td>
+</tr>
+{% endmacro %}
+
+
+{% macro form_actions(cancel_url, submit_label='Salvar') %}
+<div class="form-actions">
+  <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> {{ submit_label }}</button>
+  <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Cancelar</a>
+</div>
+{% endmacro %}
