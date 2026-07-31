@@ -55,7 +55,7 @@
   <tbody>
     {% for m in historico %}
     <tr>
-      <td>{{ m.data_movimentacao|brdate }}</td>
+      <td>{{ m.data_movimentacao|brdatetime }}</td>
       <td>{{ m.tipo_movimentacao }}</td>
       <td>{{ m.unidade_origem_nome or '-' }}</td>
       <td>{{ m.unidade_destino_nome or '-' }}</td>

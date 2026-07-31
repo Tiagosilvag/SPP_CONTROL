@@ -55,7 +55,7 @@
   <tbody>
     {% for e in entradas %}
     <tr>
-      <td>{{ e.data_entrada|brdate }}</td>
+      <td>{{ e.data_entrada|brdatetime }}</td>
       <td>{{ e.material_nome }}</td>
       <td>{{ e.quantidade|round(2) }} {{ e.unidade_medida }}</td>
       <td>{{ e.secretaria_sigla or '-' }}</td>

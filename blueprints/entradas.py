@@ -41,10 +41,10 @@ def listar():
         sql += " AND e.fornecedor_id=?"
         args.append(fornecedor_id)
     if data_inicio:
-        sql += " AND e.data_entrada >= ?"
+        sql += " AND e.data_entrada::date >= ?::date"
         args.append(data_inicio)
     if data_fim:
-        sql += " AND e.data_entrada <= ?"
+        sql += " AND e.data_entrada::date <= ?::date"
         args.append(data_fim)
     sql += " ORDER BY e.data_entrada DESC"
 

@@ -42,10 +42,10 @@ def listar():
         sql += " AND mc.responsavel ILIKE ?"
         args.append(f"%{responsavel}%")
     if data_inicio:
-        sql += " AND mc.data_movimentacao >= ?"
+        sql += " AND mc.data_movimentacao::date >= ?::date"
         args.append(data_inicio)
     if data_fim:
-        sql += " AND mc.data_movimentacao <= ?"
+        sql += " AND mc.data_movimentacao::date <= ?::date"
         args.append(data_fim)
     sql += " ORDER BY mc.data_movimentacao DESC"
     movs = query_all(sql, tuple(args))

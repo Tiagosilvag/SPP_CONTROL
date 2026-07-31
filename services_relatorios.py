@@ -65,9 +65,9 @@ def relatorio_entradas(filtros):
     if _f(filtros, "fornecedor_id"):
         sql += " AND e.fornecedor_id=?"; args.append(filtros["fornecedor_id"])
     if _f(filtros, "data_inicio"):
-        sql += " AND e.data_entrada >= ?"; args.append(filtros["data_inicio"])
+        sql += " AND e.data_entrada::date >= ?::date"; args.append(filtros["data_inicio"])
     if _f(filtros, "data_fim"):
-        sql += " AND e.data_entrada <= ?"; args.append(filtros["data_fim"])
+        sql += " AND e.data_entrada::date <= ?::date"; args.append(filtros["data_fim"])
     sql += " ORDER BY e.data_entrada DESC"
     return colunas, query_all(sql, tuple(args))
 
@@ -90,9 +90,9 @@ def relatorio_saidas(filtros):
     if _f(filtros, "obra_id"):
         sql += " AND mc.obra_id=?"; args.append(filtros["obra_id"])
     if _f(filtros, "data_inicio"):
-        sql += " AND mc.data_movimentacao >= ?"; args.append(filtros["data_inicio"])
+        sql += " AND mc.data_movimentacao::date >= ?::date"; args.append(filtros["data_inicio"])
     if _f(filtros, "data_fim"):
-        sql += " AND mc.data_movimentacao <= ?"; args.append(filtros["data_fim"])
+        sql += " AND mc.data_movimentacao::date <= ?::date"; args.append(filtros["data_fim"])
     sql += " ORDER BY mc.data_movimentacao DESC"
     return colunas, query_all(sql, tuple(args))
 
@@ -235,9 +235,9 @@ def relatorio_movimentacoes(filtros):
     if _f(filtros, "responsavel"):
         sql += " AND mp.responsavel ILIKE ?"; args.append(f"%{filtros['responsavel']}%")
     if _f(filtros, "data_inicio"):
-        sql += " AND mp.data_movimentacao >= ?"; args.append(filtros["data_inicio"])
+        sql += " AND mp.data_movimentacao::date >= ?::date"; args.append(filtros["data_inicio"])
     if _f(filtros, "data_fim"):
-        sql += " AND mp.data_movimentacao <= ?"; args.append(filtros["data_fim"])
+        sql += " AND mp.data_movimentacao::date <= ?::date"; args.append(filtros["data_fim"])
     sql += " ORDER BY mp.data_movimentacao DESC"
     return colunas, query_all(sql, tuple(args))
 

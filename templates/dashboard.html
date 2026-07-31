@@ -145,7 +145,7 @@
           <tbody>
           {% for m in ultimos_emprestimos %}
             <tr>
-              <td>{{ m.data_movimentacao|brdate }}</td>
+              <td>{{ m.data_movimentacao|brdatetime }}</td>
               <td>{{ m.num_patrimonio }}</td>
               <td>{{ m.responsavel }}</td>
               <td>
@@ -206,7 +206,7 @@
       <tbody>
       {% for e in ultimas_entradas %}
         <tr>
-          <td>{{ e.data_entrada|brdate }}</td>
+          <td>{{ e.data_entrada|brdatetime }}</td>
           <td>{{ e.material_nome }}</td>
           <td>{{ e.quantidade|round(1) }}</td>
           <td>{{ e.secretaria_sigla or '-' }}</td>

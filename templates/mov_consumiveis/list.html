@@ -69,7 +69,7 @@
   <tbody>
     {% for m in movs %}
     <tr>
-      <td>{{ m.data_movimentacao|brdate }}</td>
+      <td>{{ m.data_movimentacao|brdatetime }}</td>
       <td>{{ m.tipo_movimentacao }}</td>
       <td>{{ m.material_nome }}</td>
       <td>{{ m.quantidade|round(2) }}</td>

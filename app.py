@@ -99,11 +99,12 @@ def create_app():
 
     @app.context_processor
     def inject_globals():
-        from datetime import date
+        from datetime import date, datetime
 
         return {
             "sistema_nome": app.config["SISTEMA_NOME"],
             "hoje": date.today().isoformat(),
+            "agora": datetime.now().strftime("%Y-%m-%dT%H:%M"),
             "current_user": g.get("user") if g else None,
             "menu_permitido": lambda chave: menu_permitido(g.get("user"), chave),
         }
@@ -117,6 +118,20 @@ def create_app():
         try:
             y, m, d = str(value)[:10].split("-")
             return f"{d}/{m}/{y}"
+        except (ValueError, AttributeError):
+            return value
+
+    @app.template_filter("brdatetime")
+    def brdatetime(value, default="-"):
+        """Converte uma data/hora ISO (YYYY-MM-DDTHH:MM, ou só YYYY-MM-DD
+        nos registros antigos) para o formato brasileiro (DD/MM/AAAA HH:MM)."""
+        if not value:
+            return default
+        try:
+            data_parte, _, hora_parte = str(value).partition("T")
+            y, m, d = data_parte[:10].split("-")
+            data_fmt = f"{d}/{m}/{y}"
+            return f"{data_fmt} {hora_parte[:5]}" if hora_parte else data_fmt
         except (ValueError, AttributeError):
             return value
 
