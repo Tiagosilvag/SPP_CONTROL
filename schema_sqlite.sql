@@ -1,5 +1,9 @@
+-- Schema histórico usado apenas por seed_data.py para (re)gerar um banco
+-- SQLite local a partir da planilha original. O banco de produção da
+-- aplicação usa PostgreSQL (veja schema.sql).
+
 CREATE TABLE IF NOT EXISTS secretarias (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     sigla TEXT NOT NULL,
     responsavel TEXT,
@@ -8,7 +12,7 @@ CREATE TABLE IF NOT EXISTS secretarias (
 );
 
 CREATE TABLE IF NOT EXISTS unidades (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     secretaria_id INTEGER NOT NULL REFERENCES secretarias(id),
     nome TEXT NOT NULL,
     endereco TEXT,
@@ -17,17 +21,17 @@ CREATE TABLE IF NOT EXISTS unidades (
 );
 
 CREATE TABLE IF NOT EXISTS materiais (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     tipo_material TEXT NOT NULL,      -- 'Consumível' ou 'Patrimonial'
     categoria TEXT,
     unidade_medida TEXT,
-    estoque_minimo DOUBLE PRECISION DEFAULT 0,
+    estoque_minimo REAL DEFAULT 0,
     ativo INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS fornecedores (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     cnpj TEXT,
     contato TEXT,
@@ -35,7 +39,7 @@ CREATE TABLE IF NOT EXISTS fornecedores (
 );
 
 CREATE TABLE IF NOT EXISTS obras (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     descricao TEXT NOT NULL,
     secretaria_solicitante_id INTEGER REFERENCES secretarias(id),
     unidade_local_id INTEGER REFERENCES unidades(id),
@@ -47,7 +51,7 @@ CREATE TABLE IF NOT EXISTS obras (
 );
 
 CREATE TABLE IF NOT EXISTS patrimonios (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     num_patrimonio TEXT UNIQUE NOT NULL,
     material_id INTEGER NOT NULL REFERENCES materiais(id),
     secretaria_proprietaria_id INTEGER REFERENCES secretarias(id),
@@ -59,24 +63,24 @@ CREATE TABLE IF NOT EXISTS patrimonios (
 );
 
 CREATE TABLE IF NOT EXISTS entradas_estoque (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_entrada TEXT NOT NULL,
     material_id INTEGER NOT NULL REFERENCES materiais(id),
     secretaria_proprietaria_id INTEGER REFERENCES secretarias(id),
     unidade_destino_id INTEGER REFERENCES unidades(id),
     fornecedor_id INTEGER REFERENCES fornecedores(id),
-    quantidade DOUBLE PRECISION NOT NULL,
+    quantidade REAL NOT NULL,
     nota_fiscal TEXT,
     obra_id INTEGER REFERENCES obras(id),
     observacoes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS movimentacoes_consumiveis (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_movimentacao TEXT NOT NULL,
     tipo_movimentacao TEXT NOT NULL,
     material_id INTEGER NOT NULL REFERENCES materiais(id),
-    quantidade DOUBLE PRECISION NOT NULL,
+    quantidade REAL NOT NULL,
     unidade_origem_id INTEGER REFERENCES unidades(id),
     unidade_destino_id INTEGER REFERENCES unidades(id),
     secretaria_proprietaria_id INTEGER REFERENCES secretarias(id),
@@ -89,7 +93,7 @@ CREATE TABLE IF NOT EXISTS movimentacoes_consumiveis (
 );
 
 CREATE TABLE IF NOT EXISTS movimentacoes_patrimonio (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_movimentacao TEXT NOT NULL,
     tipo_movimentacao TEXT NOT NULL,
     patrimonio_id INTEGER NOT NULL REFERENCES patrimonios(id),
@@ -105,18 +109,18 @@ CREATE TABLE IF NOT EXISTS movimentacoes_patrimonio (
 );
 
 CREATE TABLE IF NOT EXISTS cotacoes (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     obra_id INTEGER NOT NULL REFERENCES obras(id),
     fornecedor_id INTEGER REFERENCES fornecedores(id),
     descricao TEXT NOT NULL,
-    valor_cotado DOUBLE PRECISION NOT NULL,
-    valor_economizado DOUBLE PRECISION NOT NULL DEFAULT 0,
+    valor_cotado REAL NOT NULL,
+    valor_economizado REAL NOT NULL DEFAULT 0,
     data_cotacao TEXT,
     observacoes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     senha_hash TEXT NOT NULL,

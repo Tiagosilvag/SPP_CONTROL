@@ -10,10 +10,10 @@ import os
 import sqlite3
 import openpyxl
 
-from config import Config
-
-XLSX_PATH = os.path.join(os.path.dirname(__file__), "data", "Controle_Materiais_SPP.xlsx")
-SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
+BASE_DIR = os.path.dirname(__file__)
+XLSX_PATH = os.path.join(BASE_DIR, "data", "Controle_Materiais_SPP.xlsx")
+SCHEMA_PATH = os.path.join(BASE_DIR, "schema_sqlite.sql")
+DB_PATH = os.path.join(BASE_DIR, "instance", "spp_control.db")
 
 
 def bool_sn(v):
@@ -29,14 +29,13 @@ def as_date(v):
 
 
 def run():
-    db_path = Config.DATABASE_PATH
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
     # Recria o banco do zero
-    if os.path.exists(db_path):
-        os.remove(db_path)
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
 
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     with open(SCHEMA_PATH, encoding="utf-8") as f:
         conn.executescript(f.read())

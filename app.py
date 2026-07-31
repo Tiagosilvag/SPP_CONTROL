@@ -1,4 +1,3 @@
-import os
 from flask import Flask, render_template
 from config import Config
 import db as db_module
@@ -8,12 +7,16 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    os.makedirs(os.path.dirname(app.config["DATABASE_PATH"]), exist_ok=True)
+    if not app.config["DATABASE_URL"]:
+        raise RuntimeError(
+            "A variável de ambiente DATABASE_URL não está definida. "
+            "Configure-a com a string de conexão do PostgreSQL."
+        )
+
     db_module.init_app(app)
 
-    # Cria as tabelas automaticamente caso o banco ainda não exista
-    if not os.path.exists(app.config["DATABASE_PATH"]):
-        db_module.init_db(app)
+    # Cria as tabelas automaticamente caso ainda não existam (idempotente)
+    db_module.init_db(app)
 
     # Registro dos módulos (blueprints) do sistema
     from blueprints.home import bp as home_bp

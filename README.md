@@ -43,9 +43,9 @@ outros tipos de controle) sem afetar o que já existe.
 ## 2. Requisitos
 
 - Python 3.10 ou superior
-- Não é necessário instalar banco de dados separado: o sistema usa **SQLite**
-  (arquivo único, já incluso no Python — `sqlite3`), então não há
-  dependências pesadas para instalar.
+- Um banco **PostgreSQL** acessível (local ou remoto, ex: instância criada no
+  Coolify). A string de conexão é lida da variável de ambiente
+  `DATABASE_URL` (formato `postgresql://usuario:senha@host:porta/banco`).
 
 ---
 
@@ -60,25 +60,22 @@ python3 -m venv venv
 source venv/bin/activate        # Linux/Mac
 venv\Scripts\activate           # Windows
 
-# 3. Instale as dependências (apenas Flask e openpyxl)
+# 3. Instale as dependências
 pip install -r requirements.txt
 
-# 4. Importe os dados de exemplo (os mesmos da planilha original)
-python seed_data.py
+# 4. Configure a conexão com o PostgreSQL
+export DATABASE_URL="postgresql://usuario:senha@host:porta/banco"   # Linux/Mac
+$env:DATABASE_URL = "postgresql://usuario:senha@host:porta/banco"   # Windows PowerShell
 
-# 5. Rode a aplicação
+# 5. Rode a aplicação (cria as tabelas automaticamente na primeira execução)
 python app.py
 ```
 
 Acesse no navegador: **http://localhost:5000**
 
-> O `seed_data.py` recria o banco do zero e importa os dados da planilha que
-> está em `data/Controle_Materiais_SPP.xlsx`. Rode esse comando sempre que
-> quiser "resetar" o sistema para o estado inicial da planilha.
->
-> Se preferir começar com o banco **vazio** (sem os dados de exemplo), basta
-> não rodar o `seed_data.py`: o `app.py` cria as tabelas automaticamente na
-> primeira execução.
+> Se você já tinha dados no antigo `instance/spp_control.db` (SQLite), rode
+> `python migrate_sqlite_to_postgres.py` (com `DATABASE_URL` definida) para
+> copiá-los para o PostgreSQL antes de subir a aplicação em produção.
 
 ---
 
@@ -88,15 +85,14 @@ Acesse no navegador: **http://localhost:5000**
 spp_control/
 ├── app.py                # Cria e configura a aplicação Flask (todos os módulos)
 ├── config.py              # Configurações gerais
-├── db.py                  # Conexão com o banco SQLite
+├── db.py                  # Conexão com o banco PostgreSQL
 ├── schema.sql              # Definição das tabelas do banco
 ├── services.py             # Regras de negócio (cálculo de estoque, status de patrimônio)
-├── seed_data.py             # Importa os dados da planilha original para o banco
+├── seed_data.py             # Importa os dados da planilha original para um SQLite local (uso histórico)
+├── migrate_sqlite_to_postgres.py   # Migra dados do SQLite antigo para o PostgreSQL
 ├── requirements.txt
 ├── data/
 │   └── Controle_Materiais_SPP.xlsx   # Planilha original (dados de exemplo)
-├── instance/
-│   └── spp_control.db       # Banco de dados (criado automaticamente)
 ├── blueprints/              # Um arquivo por módulo do sistema
 │   ├── dashboard.py
 │   ├── secretarias.py
@@ -131,8 +127,8 @@ independente. Para criar um novo módulo (ex: "Relatórios", "Usuários"):
 - **Autenticação de usuários**: esta versão não tem tela de login. Já existe
   uma tabela `usuarios` reservada no banco para quando esse módulo for
   desenvolvido.
-- **Backup**: o banco de dados é um único arquivo
-  (`instance/spp_control.db`). Para fazer backup, basta copiar esse arquivo.
+- **Backup**: o banco de dados é PostgreSQL. Use `pg_dump` (ou a aba
+  **Backups** do serviço no Coolify) para gerar backups regulares.
 - **Ambiente de produção**: o comando `python app.py` sobe um servidor de
   desenvolvimento. Para uso real (produção), recomenda-se rodar atrás de um
   servidor WSGI como `gunicorn` ou `waitress`, e configurar HTTPS.
