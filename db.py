@@ -76,11 +76,16 @@ def _client_ip():
 
 
 def _fetch_row_as_dict(cur, table, record_id):
+    """cur é um cursor comum (não RealDictCursor) aqui, então fetchone()
+    retorna uma tupla — monta o dict a partir de cur.description."""
     if record_id is None:
         return None
     cur.execute(f"SELECT * FROM {table} WHERE id = %s", (record_id,))
     row = cur.fetchone()
-    return dict(row) if row else None
+    if row is None:
+        return None
+    colnames = [desc[0] for desc in cur.description]
+    return dict(zip(colnames, row))
 
 
 def _log_auditoria(cur, operacao, tabela, registro_id, valor_anterior, valor_novo):
