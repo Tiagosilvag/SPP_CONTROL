@@ -26,24 +26,28 @@
 <body>
 {% set nav_map = {
   'dashboard': {'section': none, 'label': 'Dashboard'},
-  'secretarias': {'section': 'Estrutura', 'label': 'Secretarias'},
-  'unidades': {'section': 'Estrutura', 'label': 'Unidades'},
+  'mov_consumiveis': {'section': 'Movimentações', 'label': 'Movimentações (Consumíveis)'},
+  'mov_patrimonio': {'section': 'Movimentações', 'label': 'Movimentações (Patrimônio)'},
+  'entradas': {'section': 'Estoque', 'label': 'Entradas de Estoque'},
+  'estoque': {'section': 'Estoque', 'label': 'Saldo em Estoque'},
+  'patrimonio': {'section': 'Estoque', 'label': 'Bens Patrimoniais'},
+  'pedidos_compra': {'section': 'Compras', 'label': 'Pedidos de Compra'},
+  'licitacoes': {'section': 'Compras', 'label': 'Licitações'},
+  'secretarias': {'section': 'Cadastros', 'label': 'Secretarias'},
+  'unidades': {'section': 'Cadastros', 'label': 'Unidades'},
   'materiais': {'section': 'Cadastros', 'label': 'Materiais'},
   'fornecedores': {'section': 'Cadastros', 'label': 'Fornecedores'},
   'obras': {'section': 'Cadastros', 'label': 'Obras'},
-  'entradas': {'section': 'Estoque', 'label': 'Entradas de Estoque'},
-  'mov_consumiveis': {'section': 'Estoque', 'label': 'Movimentações (Consumíveis)'},
-  'estoque': {'section': 'Estoque', 'label': 'Saldo em Estoque'},
-  'patrimonio': {'section': 'Patrimônio', 'label': 'Bens Patrimoniais'},
-  'mov_patrimonio': {'section': 'Patrimônio', 'label': 'Movimentações (Patrimônio)'},
-  'pedidos_compra': {'section': 'Compras', 'label': 'Pedidos de Compra'},
-  'licitacoes': {'section': 'Compras', 'label': 'Licitações'},
-  'relatorios': {'section': none, 'label': 'Relatórios'},
-  'auditoria': {'section': none, 'label': 'Auditoria'},
-  'usuarios': {'section': none, 'label': 'Usuários'},
+  'relatorios': {'section': 'Sistema', 'label': 'Relatórios'},
+  'auditoria': {'section': 'Sistema', 'label': 'Auditoria'},
+  'usuarios': {'section': 'Sistema', 'label': 'Usuários'},
   'cotacoes': {'section': none, 'label': 'Cotações'},
 } %}
 {% set current_nav = nav_map.get(request.blueprint, {'section': none, 'label': sistema_nome}) %}
+{% set cadastros_blueprints = ['secretarias', 'unidades', 'materiais', 'fornecedores', 'obras'] %}
+{% set sistema_blueprints = ['relatorios', 'auditoria', 'usuarios'] %}
+{% set cadastros_open = request.blueprint in cadastros_blueprints %}
+{% set sistema_open = request.blueprint in sistema_blueprints %}
 {% set is_cotacoes = request.blueprint == 'cotacoes' %}
 {% set module_label = 'Cotação x Projeto' if is_cotacoes else 'Materiais e Patrimônio' %}
 {% set module_icon = 'bi-graph-up-arrow' if is_cotacoes else 'bi-shield-lock-fill' %}
@@ -70,35 +74,75 @@
       <ul class="nav flex-column">
         <li class="nav-item"><a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.blueprint=='dashboard' }}"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
 
-        <li><span class="nav-section-title">Estrutura</span></li>
-        <li class="nav-item"><a href="{{ url_for('secretarias.listar') }}" class="nav-link {{ 'active' if request.blueprint=='secretarias' }}"><i class="bi bi-building"></i>Secretarias</a></li>
-        <li class="nav-item"><a href="{{ url_for('unidades.listar') }}" class="nav-link {{ 'active' if request.blueprint=='unidades' }}"><i class="bi bi-geo-alt"></i>Unidades</a></li>
+        <li class="nav-group">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('mov_consumiveis', 'mov_patrimonio') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-movimentacoes" aria-expanded="true">
+            <i class="bi bi-arrow-left-right"></i><span>Movimentações</span><i class="bi bi-chevron-down nav-group-caret"></i>
+          </button>
+          <div class="collapse show" id="nav-group-movimentacoes">
+            <ul class="nav flex-column nav-group-items">
+              <li class="nav-item"><a href="{{ url_for('mov_consumiveis.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_consumiveis' }}"><i class="bi bi-arrow-left-right"></i>Movimentações (Consumíveis)</a></li>
+              <li class="nav-item"><a href="{{ url_for('mov_patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_patrimonio' }}"><i class="bi bi-arrow-repeat"></i>Movimentações (Patrimônio)</a></li>
+            </ul>
+          </div>
+        </li>
 
-        <li><span class="nav-section-title">Cadastros</span></li>
-        <li class="nav-item"><a href="{{ url_for('materiais.listar') }}" class="nav-link {{ 'active' if request.blueprint=='materiais' }}"><i class="bi bi-box-seam"></i>Materiais</a></li>
-        <li class="nav-item"><a href="{{ url_for('fornecedores.listar') }}" class="nav-link {{ 'active' if request.blueprint=='fornecedores' }}"><i class="bi bi-truck"></i>Fornecedores</a></li>
-        <li class="nav-item"><a href="{{ url_for('obras.listar') }}" class="nav-link {{ 'active' if request.blueprint=='obras' }}"><i class="bi bi-cone-striped"></i>Obras</a></li>
-
-        <li><span class="nav-section-title">Estoque</span></li>
-        <li class="nav-item"><a href="{{ url_for('entradas.listar') }}" class="nav-link {{ 'active' if request.blueprint=='entradas' }}"><i class="bi bi-box-arrow-in-down"></i>Entradas</a></li>
-        <li class="nav-item"><a href="{{ url_for('mov_consumiveis.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_consumiveis' }}"><i class="bi bi-arrow-left-right"></i>Movimentações (Consumíveis)</a></li>
-        <li class="nav-item"><a href="{{ url_for('estoque.listar') }}" class="nav-link {{ 'active' if request.blueprint=='estoque' }}"><i class="bi bi-clipboard-data"></i>Saldo em Estoque</a></li>
-
-        <li><span class="nav-section-title">Patrimônio</span></li>
-        <li class="nav-item"><a href="{{ url_for('patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='patrimonio' }}"><i class="bi bi-tools"></i>Bens Patrimoniais</a></li>
-        <li class="nav-item"><a href="{{ url_for('mov_patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_patrimonio' }}"><i class="bi bi-arrow-repeat"></i>Movimentações (Patrimônio)</a></li>
+        <li class="nav-group">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('entradas', 'estoque', 'patrimonio') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-estoque" aria-expanded="true">
+            <i class="bi bi-box-seam"></i><span>Estoque</span><i class="bi bi-chevron-down nav-group-caret"></i>
+          </button>
+          <div class="collapse show" id="nav-group-estoque">
+            <ul class="nav flex-column nav-group-items">
+              <li class="nav-item"><a href="{{ url_for('entradas.listar') }}" class="nav-link {{ 'active' if request.blueprint=='entradas' }}"><i class="bi bi-box-arrow-in-down"></i>Entradas</a></li>
+              <li class="nav-item"><a href="{{ url_for('estoque.listar') }}" class="nav-link {{ 'active' if request.blueprint=='estoque' }}"><i class="bi bi-clipboard-data"></i>Saldo em Estoque</a></li>
+              <li class="nav-item"><a href="{{ url_for('patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='patrimonio' }}"><i class="bi bi-tools"></i>Bens Patrimoniais</a></li>
+            </ul>
+          </div>
+        </li>
 
         {% if current_user and current_user.perfil in ('Administrador', 'Gestor') %}
-        <li><span class="nav-section-title">Compras</span></li>
-        <li class="nav-item"><a href="{{ url_for('pedidos_compra.listar') }}" class="nav-link {{ 'active' if request.blueprint=='pedidos_compra' }}"><i class="bi bi-cart4"></i>Pedidos de Compra</a></li>
-        <li class="nav-item"><a href="{{ url_for('licitacoes.listar') }}" class="nav-link {{ 'active' if request.blueprint=='licitacoes' }}"><i class="bi bi-file-earmark-text"></i>Licitações</a></li>
-
-        <li><span class="nav-section-title">Sistema</span></li>
-        <li class="nav-item"><a href="{{ url_for('relatorios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='relatorios' }}"><i class="bi bi-file-earmark-bar-graph"></i>Relatórios</a></li>
-        <li class="nav-item"><a href="{{ url_for('auditoria.listar') }}" class="nav-link {{ 'active' if request.blueprint=='auditoria' }}"><i class="bi bi-journal-text"></i>Auditoria</a></li>
+        <li class="nav-group">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('pedidos_compra', 'licitacoes') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-compras" aria-expanded="true">
+            <i class="bi bi-cart4"></i><span>Compras</span><i class="bi bi-chevron-down nav-group-caret"></i>
+          </button>
+          <div class="collapse show" id="nav-group-compras">
+            <ul class="nav flex-column nav-group-items">
+              <li class="nav-item"><a href="{{ url_for('pedidos_compra.listar') }}" class="nav-link {{ 'active' if request.blueprint=='pedidos_compra' }}"><i class="bi bi-cart4"></i>Pedidos de Compra</a></li>
+              <li class="nav-item"><a href="{{ url_for('licitacoes.listar') }}" class="nav-link {{ 'active' if request.blueprint=='licitacoes' }}"><i class="bi bi-file-earmark-text"></i>Licitações</a></li>
+            </ul>
+          </div>
+        </li>
         {% endif %}
-        {% if current_user and current_user.perfil == 'Administrador' %}
-        <li class="nav-item"><a href="{{ url_for('usuarios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='usuarios' }}"><i class="bi bi-people-fill"></i>Usuários</a></li>
+
+        <li class="nav-group">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if cadastros_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-cadastros" aria-expanded="{{ 'true' if cadastros_open else 'false' }}">
+            <i class="bi bi-building"></i><span>Cadastros</span><i class="bi bi-chevron-down nav-group-caret"></i>
+          </button>
+          <div class="collapse {{ 'show' if cadastros_open }}" id="nav-group-cadastros">
+            <ul class="nav flex-column nav-group-items">
+              <li class="nav-item"><a href="{{ url_for('secretarias.listar') }}" class="nav-link {{ 'active' if request.blueprint=='secretarias' }}"><i class="bi bi-building"></i>Secretarias</a></li>
+              <li class="nav-item"><a href="{{ url_for('unidades.listar') }}" class="nav-link {{ 'active' if request.blueprint=='unidades' }}"><i class="bi bi-geo-alt"></i>Unidades</a></li>
+              <li class="nav-item"><a href="{{ url_for('materiais.listar') }}" class="nav-link {{ 'active' if request.blueprint=='materiais' }}"><i class="bi bi-box-seam"></i>Materiais</a></li>
+              <li class="nav-item"><a href="{{ url_for('fornecedores.listar') }}" class="nav-link {{ 'active' if request.blueprint=='fornecedores' }}"><i class="bi bi-truck"></i>Fornecedores</a></li>
+              <li class="nav-item"><a href="{{ url_for('obras.listar') }}" class="nav-link {{ 'active' if request.blueprint=='obras' }}"><i class="bi bi-cone-striped"></i>Obras</a></li>
+            </ul>
+          </div>
+        </li>
+
+        {% if current_user and current_user.perfil in ('Administrador', 'Gestor') %}
+        <li class="nav-group">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if sistema_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-sistema" aria-expanded="{{ 'true' if sistema_open else 'false' }}">
+            <i class="bi bi-gear"></i><span>Sistema</span><i class="bi bi-chevron-down nav-group-caret"></i>
+          </button>
+          <div class="collapse {{ 'show' if sistema_open }}" id="nav-group-sistema">
+            <ul class="nav flex-column nav-group-items">
+              <li class="nav-item"><a href="{{ url_for('relatorios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='relatorios' }}"><i class="bi bi-file-earmark-bar-graph"></i>Relatórios</a></li>
+              <li class="nav-item"><a href="{{ url_for('auditoria.listar') }}" class="nav-link {{ 'active' if request.blueprint=='auditoria' }}"><i class="bi bi-journal-text"></i>Auditoria</a></li>
+              {% if current_user.perfil == 'Administrador' %}
+              <li class="nav-item"><a href="{{ url_for('usuarios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='usuarios' }}"><i class="bi bi-people-fill"></i>Usuários</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </li>
         {% endif %}
       </ul>
       {% endif %}
