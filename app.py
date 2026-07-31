@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, g
 from config import Config
 import db as db_module
 from auth import load_logged_in_user
+from permissoes import MENU_CHAVES, menu_permitido
 
 
 def create_app():
@@ -39,10 +40,12 @@ def create_app():
     from blueprints.licitacoes import bp as licitacoes_bp
     from blueprints.relatorios import bp as relatorios_bp
     from blueprints.auditoria import bp as auditoria_bp
+    from blueprints.permissoes import bp as permissoes_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(usuarios_bp, url_prefix="/usuarios")
+    app.register_blueprint(permissoes_bp, url_prefix="/permissoes")
     app.register_blueprint(auditoria_bp, url_prefix="/auditoria")
     app.register_blueprint(relatorios_bp, url_prefix="/relatorios")
 
@@ -80,6 +83,16 @@ def create_app():
             flash("Faça login para continuar.", "warning")
             return redirect(url_for("auth.login", next=request.path))
 
+    @app.before_request
+    def _exigir_permissao_menu():
+        if request.endpoint is None or request.endpoint.startswith("static"):
+            return
+        if g.user is None:
+            return  # _exigir_login já tratou (ou a rota é isenta de login)
+        if request.blueprint in MENU_CHAVES and not menu_permitido(g.user, request.blueprint):
+            flash("Você não tem permissão para acessar este módulo.", "danger")
+            return redirect(url_for("home.index"))
+
     @app.errorhandler(404)
     def not_found(e):
         return render_template("404.html"), 404
@@ -92,6 +105,7 @@ def create_app():
             "sistema_nome": app.config["SISTEMA_NOME"],
             "hoje": date.today().isoformat(),
             "current_user": g.get("user") if g else None,
+            "menu_permitido": lambda chave: menu_permitido(g.get("user"), chave),
         }
 
     @app.template_filter("brdate")

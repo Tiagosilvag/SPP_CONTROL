@@ -76,6 +76,7 @@
         <p class="text-muted mb-0">Controle de estoque, entradas, movimentações e bens patrimoniais das secretarias.</p>
       </a>
     </div>
+    {% if menu_permitido('cotacoes') %}
     <div class="col-md-6">
       <a href="{{ url_for('cotacoes.listar') }}" class="surface-card module-card">
         <span class="module-card-icon badge-soft-success"><i class="bi bi-graph-up-arrow"></i></span>
@@ -83,6 +84,7 @@
         <p class="text-muted mb-0">Compare o valor de mercado cotado com a economia obtida em cada projeto.</p>
       </a>
     </div>
+    {% endif %}
   </div>
 </div>
 

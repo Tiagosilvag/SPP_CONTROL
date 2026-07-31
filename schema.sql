@@ -241,3 +241,19 @@ ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS obra_origem_id IN
 ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS obra_destino_id INTEGER REFERENCES obras(id);
 ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS obra_origem_id INTEGER REFERENCES obras(id);
 ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS obra_destino_id INTEGER REFERENCES obras(id);
+
+-- Permissões por usuário: quais itens de menu cada usuário pode acessar.
+-- Administrador sempre tem acesso total (hardcoded, não passa por aqui).
+-- Enquanto permissoes_customizadas=0, o usuário usa o padrão do perfil;
+-- ao salvar uma customização em /permissoes, a flag vira 1 e as linhas
+-- de usuario_permissoes passam a valer.
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS permissoes_customizadas INTEGER NOT NULL DEFAULT 0;
+
+-- id próprio (em vez de chave composta) porque db.execute() sempre faz
+-- "RETURNING id" em INSERTs, assumindo esse padrão em toda tabela do app.
+CREATE TABLE IF NOT EXISTS usuario_permissoes (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    menu_chave TEXT NOT NULL,
+    UNIQUE (usuario_id, menu_chave)
+);
