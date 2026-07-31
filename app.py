@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash, g
 from config import Config
 import db as db_module
+from auth import load_logged_in_user
 
 
 def create_app():
@@ -15,11 +16,13 @@ def create_app():
 
     db_module.init_app(app)
 
-    # Cria as tabelas automaticamente caso ainda não existam (idempotente)
+    # Cria/atualiza as tabelas automaticamente (idempotente)
     db_module.init_db(app)
 
     # Registro dos módulos (blueprints) do sistema
     from blueprints.home import bp as home_bp
+    from blueprints.auth import bp as auth_bp
+    from blueprints.usuarios import bp as usuarios_bp
     from blueprints.dashboard import bp as dashboard_bp
     from blueprints.secretarias import bp as secretarias_bp
     from blueprints.unidades import bp as unidades_bp
@@ -32,8 +35,16 @@ def create_app():
     from blueprints.mov_patrimonio import bp as mov_patrimonio_bp
     from blueprints.estoque import bp as estoque_bp
     from blueprints.cotacoes import bp as cotacoes_bp
+    from blueprints.pedidos_compra import bp as pedidos_compra_bp
+    from blueprints.licitacoes import bp as licitacoes_bp
+    from blueprints.relatorios import bp as relatorios_bp
+    from blueprints.auditoria import bp as auditoria_bp
 
     app.register_blueprint(home_bp)
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(usuarios_bp, url_prefix="/usuarios")
+    app.register_blueprint(auditoria_bp, url_prefix="/auditoria")
+    app.register_blueprint(relatorios_bp, url_prefix="/relatorios")
 
     # Módulo: Materiais e Patrimônio
     app.register_blueprint(dashboard_bp, url_prefix="/materiais-patrimonio")
@@ -47,9 +58,27 @@ def create_app():
     app.register_blueprint(mov_consumiveis_bp, url_prefix="/movimentacoes-consumiveis")
     app.register_blueprint(mov_patrimonio_bp, url_prefix="/movimentacoes-patrimonio")
     app.register_blueprint(estoque_bp, url_prefix="/estoque")
+    app.register_blueprint(pedidos_compra_bp, url_prefix="/pedidos-compra")
+    app.register_blueprint(licitacoes_bp, url_prefix="/licitacoes")
 
     # Módulo: Cotação x Projeto
     app.register_blueprint(cotacoes_bp, url_prefix="/cotacoes")
+
+    @app.before_request
+    def _carregar_usuario_logado():
+        load_logged_in_user()
+
+    @app.before_request
+    def _exigir_login():
+        if request.endpoint is None or request.endpoint.startswith("static"):
+            return
+        if request.endpoint in ("auth.login", "auth.setup"):
+            return
+        if db_module.query_one("SELECT COUNT(*) AS c FROM usuarios")["c"] == 0:
+            return redirect(url_for("auth.setup"))
+        if g.user is None:
+            flash("Faça login para continuar.", "warning")
+            return redirect(url_for("auth.login", next=request.path))
 
     @app.errorhandler(404)
     def not_found(e):
@@ -58,7 +87,12 @@ def create_app():
     @app.context_processor
     def inject_globals():
         from datetime import date
-        return {"sistema_nome": app.config["SISTEMA_NOME"], "hoje": date.today().isoformat()}
+
+        return {
+            "sistema_nome": app.config["SISTEMA_NOME"],
+            "hoje": date.today().isoformat(),
+            "current_user": g.get("user") if g else None,
+        }
 
     @app.template_filter("brdate")
     def brdate(value, default="-"):

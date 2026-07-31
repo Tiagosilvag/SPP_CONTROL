@@ -7,9 +7,9 @@
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">Tipo de Movimentação</label>
-      <select class="form-select" name="tipo_movimentacao" id="tipo_movimentacao" required onchange="toggleDevolucao()">
+      <select class="form-select" name="tipo_movimentacao" id="tipo_movimentacao" required onchange="toggleCampos()">
         {% for t in tipos %}
-        <option value="{{ t }}">{{ t }}</option>
+        <option value="{{ t }}" {% if tipo_prefill==t %}selected{% endif %}>{{ t }}</option>
         {% endfor %}
       </select>
     </div>
@@ -56,6 +56,7 @@
       </select>
     </div>
   </div>
+
   <div class="mb-3">
     <label class="form-label">Obra (opcional)</label>
     <select class="form-select" name="obra_id">
@@ -64,6 +65,27 @@
       <option value="{{ o.id }}">{{ o.descricao }}</option>
       {% endfor %}
     </select>
+  </div>
+
+  <div id="obras-fields" class="row" style="display:none;">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Obra de Origem</label>
+      <select class="form-select" name="obra_origem_id">
+        <option value="">Selecione...</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}">{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Obra de Destino</label>
+      <select class="form-select" name="obra_destino_id">
+        <option value="">Selecione...</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}">{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </div>
 
   <div id="devolucao-fields" class="row" style="display:none;">
@@ -89,11 +111,11 @@
 </form>
 
 <script>
-function toggleDevolucao() {
+function toggleCampos() {
   const tipo = document.getElementById('tipo_movimentacao').value;
-  const box = document.getElementById('devolucao-fields');
-  box.style.display = (tipo === 'Empréstimo' || tipo === 'Devolução') ? 'flex' : 'none';
+  document.getElementById('devolucao-fields').style.display = (tipo === 'Empréstimo' || tipo === 'Devolução') ? 'flex' : 'none';
+  document.getElementById('obras-fields').style.display = (tipo === 'Transferência entre Obras') ? 'flex' : 'none';
 }
-document.addEventListener('DOMContentLoaded', toggleDevolucao);
+document.addEventListener('DOMContentLoaded', toggleCampos);
 </script>
 {% endblock %}

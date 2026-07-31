@@ -12,6 +12,22 @@
         <option value="Concluída" {% if status=='Concluída' %}selected{% endif %}>Concluída</option>
       </select>
     </div>
+    <div class="col-md-3">
+      <select class="form-select" name="secretaria_id" onchange="this.form.submit()">
+        <option value="">Secretaria</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if secretaria_id==s.id %}selected{% endif %}>{{ s.sigla }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="unidade_id" onchange="this.form.submit()">
+        <option value="">Unidade</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}" {% if unidade_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </form>
 </div>
 

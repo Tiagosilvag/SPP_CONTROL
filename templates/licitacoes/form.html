@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, form_actions %}
+{% block content %}
+{{ page_header('bi-file-earmark-text', ('Editar Licitação' if licitacao else 'Nova Licitação')) }}
+
+<form method="post" class="surface-card form-card p-4">
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Categoria</label>
+      <select class="form-select" name="categoria">
+        <option value="">Selecione...</option>
+        {% for c in categorias %}
+        <option value="{{ c }}" {% if licitacao and licitacao.categoria==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Modalidade</label>
+      <select class="form-select" name="modalidade">
+        <option value="">Selecione...</option>
+        {% for m in modalidades %}
+        <option value="{{ m }}" {% if licitacao and licitacao.modalidade==m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Objeto</label>
+    <textarea class="form-control" name="objeto" rows="2" required>{{ licitacao.objeto if licitacao else '' }}</textarea>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Processo</label>
+      <input type="text" class="form-control" name="processo" value="{{ licitacao.processo if licitacao else '' }}">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Valor Estimado</label>
+      <div class="input-group">
+        <span class="input-group-text">R$</span>
+        <input type="number" step="0.01" min="0" class="form-control" name="valor_estimado" value="{{ licitacao.valor_estimado if licitacao else 0 }}">
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Valor Homologado</label>
+      <div class="input-group">
+        <span class="input-group-text">R$</span>
+        <input type="number" step="0.01" min="0" class="form-control" name="valor_homologado" value="{{ licitacao.valor_homologado if licitacao and licitacao.valor_homologado is not none else '' }}">
+      </div>
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Observações</label>
+    <textarea class="form-control" name="observacoes" rows="3">{{ licitacao.observacoes if licitacao else '' }}</textarea>
+  </div>
+  {{ form_actions(url_for('licitacoes.listar')) }}
+</form>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{% set badge = {'Em Elaboração': 'badge-soft-neutral', 'Enviado': 'badge-soft-info', 'Parcialmente Recebido': 'badge-soft-warning', 'Recebido': 'badge-soft-success', 'Cancelado': 'badge-soft-danger'} %}
+{{ page_header('bi-cart4', pedido.numero_pedido, subtitle='Pedido de compra — ' ~ pedido.status) }}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-8">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-info-circle"></i> Dados do Pedido</div>
+      <div class="row g-3">
+        <div class="col-6 col-md-4"><div class="small text-muted">Status</div><span class="badge {{ badge.get(pedido.status, 'badge-soft-neutral') }}">{{ pedido.status }}</span></div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Data do Pedido</div>{{ pedido.data_pedido|brdate }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Previsão de Entrega</div>{{ pedido.previsao_entrega|brdate }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Secretaria</div>{{ pedido.secretaria_sigla or '-' }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Unidade</div>{{ pedido.unidade_nome or '-' }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Fornecedor</div>{{ pedido.fornecedor_nome or '-' }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Responsável</div>{{ pedido.responsavel or '-' }}</div>
+        {% if pedido.observacoes %}<div class="col-12"><div class="small text-muted">Observações</div>{{ pedido.observacoes }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel h-100 d-flex flex-column gap-2">
+      <div class="panel-title"><i class="bi bi-gear"></i> Ações</div>
+      {% if pedido.status == 'Em Elaboração' %}
+        <a href="{{ url_for('pedidos_compra.editar', id=pedido.id) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+        <form method="post" action="{{ url_for('pedidos_compra.enviar', id=pedido.id) }}"><button class="btn btn-primary btn-sm w-100"><i class="bi bi-send"></i> Enviar ao Fornecedor</button></form>
+        <form method="post" action="{{ url_for('pedidos_compra.excluir', id=pedido.id) }}" data-confirm="Confirma a exclusão deste pedido?"><button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash"></i> Excluir</button></form>
+      {% elif pedido.status in ('Enviado', 'Parcialmente Recebido') %}
+        <a href="{{ url_for('pedidos_compra.novo_recebimento', id=pedido.id) }}" class="btn btn-primary btn-sm"><i class="bi bi-box-arrow-in-down"></i> Registrar Recebimento</a>
+        <form method="post" action="{{ url_for('pedidos_compra.cancelar', id=pedido.id) }}" data-confirm="Confirma o cancelamento deste pedido?"><button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-x-circle"></i> Cancelar Pedido</button></form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="panel mb-3">
+  <div class="panel-title"><i class="bi bi-list-check"></i> Itens do Pedido</div>
+  <div class="table-responsive">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Material</th><th>Solicitada</th><th>Atendida</th><th>Pendente</th><th>Valor Unit.</th><th>Total</th></tr></thead>
+    <tbody>
+    {% for i in itens %}
+      <tr>
+        <td>{{ i.material_nome }}</td>
+        <td>{{ i.quantidade_solicitada|round(2) }} {{ i.unidade_medida }}</td>
+        <td>{{ i.quantidade_atendida|round(2) }} {{ i.unidade_medida }}</td>
+        <td>
+          <span class="badge {{ 'badge-soft-success' if i.quantidade_pendente <= 0 else 'badge-soft-warning' }}">{{ i.quantidade_pendente|round(2) }} {{ i.unidade_medida }}</span>
+        </td>
+        <td>R$ {{ '%.2f'|format(i.valor_unitario) }}</td>
+        <td>R$ {{ '%.2f'|format(i.valor_unitario * i.quantidade_solicitada) }}</td>
+      </tr>
+    {% else %}
+      {{ empty_row(6, 'Nenhum item neste pedido.') }}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title"><i class="bi bi-truck"></i> Histórico de Recebimentos</div>
+  {% if recebimentos %}
+  <div class="table-responsive">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Data</th><th>Nota Fiscal</th><th>Responsável</th><th>Observações</th></tr></thead>
+    <tbody>
+    {% for r in recebimentos %}
+      <tr>
+        <td>{{ r.data_recebimento|brdate }}</td>
+        <td>{{ r.nota_fiscal or '-' }}</td>
+        <td>{{ r.responsavel or '-' }}</td>
+        <td>{{ r.observacoes or '-' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-4">
+    <i class="bi bi-inbox"></i>
+    <div class="empty-state-title">Nenhum recebimento registrado ainda</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block content %}
+{{ page_header('bi-file-earmark-bar-graph', 'Relatórios', subtitle='Exporte dados do sistema em PDF ou Excel, com filtros.') }}
+
+<div class="row g-3">
+  {% for chave, report in reports.items() %}
+  <div class="col-6 col-md-4 col-xl-3">
+    <a href="{{ url_for('relatorios.detalhe', chave=chave) }}" class="surface-card d-block p-3 text-decoration-none h-100">
+      <span class="module-card-icon badge-soft-info d-inline-flex align-items-center justify-content-center mb-2" style="width:42px;height:42px;border-radius:12px;">
+        <i class="bi {{ report.icon }}"></i>
+      </span>
+      <div class="fw-semibold text-body">{{ report.label }}</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

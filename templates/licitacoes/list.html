@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% block content %}
+{{ page_header('bi-file-earmark-text', 'Licitações', subtitle='Cadastro de processos licitatórios.', action_url=url_for('licitacoes.nova'), action_label='Nova Licitação') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Buscar por objeto ou processo...">
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="categoria" onchange="this.form.submit()">
+        <option value="">Categoria</option>
+        {% for c in categorias %}
+        <option value="{{ c }}" {% if categoria==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="modalidade" onchange="this.form.submit()">
+        <option value="">Modalidade</option>
+        {% for m in modalidades %}
+        <option value="{{ m }}" {% if modalidade==m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Buscar</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Processo</th><th>Objeto</th><th>Categoria</th><th>Modalidade</th><th>Valor Estimado</th><th>Valor Homologado</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for l in licitacoes %}
+    <tr>
+      <td>{{ l.processo or '-' }}</td>
+      <td>{{ l.objeto }}</td>
+      <td>{{ l.categoria or '-' }}</td>
+      <td>{{ l.modalidade or '-' }}</td>
+      <td>R$ {{ '%.2f'|format(l.valor_estimado) }}</td>
+      <td>{{ ('R$ %.2f'|format(l.valor_homologado)) if l.valor_homologado is not none else '-' }}</td>
+      <td>{{ row_actions(url_for('licitacoes.editar', id=l.id), url_for('licitacoes.excluir', id=l.id), 'Confirma a exclusão desta licitação?') }}</td>
+    </tr>
+    {% else %}
+    {{ empty_row(7, 'Nenhuma licitação cadastrada.', 'bi-file-earmark-text') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

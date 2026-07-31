@@ -9,8 +9,14 @@ histórico de Entradas e Movimentações, evitando divergência de dados.
 from datetime import date
 from db import query_all, query_one, execute
 
-TIPOS_MOV_CONSUMIVEL = ["Consumo em Obra", "Transferência", "Empréstimo", "Devolução"]
-TIPOS_MOV_PATRIMONIO = ["Empréstimo", "Transferência", "Manutenção", "Devolução"]
+TIPOS_MOV_CONSUMIVEL = ["Consumo em Obra", "Transferência", "Transferência entre Obras", "Retorno", "Devolução", "Empréstimo"]
+TIPOS_MOV_PATRIMONIO = ["Transferência", "Transferência entre Obras", "Devolução", "Empréstimo", "Retorno", "Manutenção"]
+
+# Botões de ação rápida nas telas de movimentação (item 10). Empréstimo de
+# consumíveis é incomum na prática — fica disponível no formulário, mas
+# fora dos atalhos, conforme pedido.
+QUICK_TIPOS_CONSUMIVEL = ["Transferência", "Transferência entre Obras", "Retorno", "Devolução"]
+QUICK_TIPOS_PATRIMONIO = ["Transferência", "Devolução", "Empréstimo", "Retorno", "Manutenção"]
 
 
 def calcular_estoque_consumiveis():
@@ -124,7 +130,7 @@ def aplicar_efeito_movimentacao_patrimonio(mov_id):
                 (mov_id,),
             )
 
-    elif tipo == "Transferência":
+    elif tipo in ("Transferência", "Transferência entre Obras"):
         execute(
             "UPDATE patrimonios SET status='Em Uso', unidade_atual_id=COALESCE(?, unidade_atual_id) WHERE id=?",
             (mov["unidade_destino_id"], patrimonio_id),
@@ -132,6 +138,13 @@ def aplicar_efeito_movimentacao_patrimonio(mov_id):
 
     elif tipo == "Manutenção":
         execute("UPDATE patrimonios SET status='Manutenção' WHERE id=?", (patrimonio_id,))
+
+    elif tipo == "Retorno":
+        destino = mov["unidade_destino_id"] or mov["unidade_origem_id"]
+        execute(
+            "UPDATE patrimonios SET status='Disponível', unidade_atual_id=COALESCE(?, unidade_atual_id) WHERE id=?",
+            (destino, patrimonio_id),
+        )
 
     elif tipo == "Devolução":
         destino = mov["unidade_destino_id"] or mov["unidade_origem_id"]
@@ -159,53 +172,6 @@ def aplicar_efeito_movimentacao_patrimonio(mov_id):
             )
 
 
-def listar_cotacoes(obra_id=None, q=None):
-    """Lista cotações vinculadas a obras, com a diferença e o percentual de
-    economia calculados a partir do valor cotado (mercado) e do valor
-    efetivamente economizado no projeto."""
-    sql = """SELECT c.*, o.descricao AS obra_descricao, f.nome AS fornecedor_nome
-             FROM cotacoes c
-             JOIN obras o ON o.id = c.obra_id
-             LEFT JOIN fornecedores f ON f.id = c.fornecedor_id
-             WHERE 1=1"""
-    args = []
-    if obra_id:
-        sql += " AND c.obra_id=?"
-        args.append(obra_id)
-    if q:
-        sql += " AND c.descricao LIKE ?"
-        args.append(f"%{q}%")
-    sql += " ORDER BY c.data_cotacao DESC, c.id DESC"
-    rows = query_all(sql, tuple(args))
-
-    linhas = []
-    for r in rows:
-        valor_cotado = r["valor_cotado"] or 0
-        valor_economizado = r["valor_economizado"] or 0
-        diferenca = valor_cotado - valor_economizado
-        percentual_economia = (diferenca / valor_cotado * 100) if valor_cotado else 0
-        linha = dict(r)
-        linha["diferenca"] = diferenca
-        linha["percentual_economia"] = percentual_economia
-        linhas.append(linha)
-    return linhas
-
-
-def resumo_cotacoes(linhas):
-    """Totais agregados de cotação x economia para o painel do módulo."""
-    total_cotado = sum(l["valor_cotado"] for l in linhas)
-    total_economizado = sum(l["valor_economizado"] for l in linhas)
-    total_diferenca = total_cotado - total_economizado
-    percentual_geral = (total_diferenca / total_cotado * 100) if total_cotado else 0
-    return {
-        "total_registros": len(linhas),
-        "total_cotado": total_cotado,
-        "total_economizado": total_economizado,
-        "total_diferenca": total_diferenca,
-        "percentual_geral": percentual_geral,
-    }
-
-
 def dashboard_stats():
     """Reúne indicadores gerais para a tela inicial do sistema."""
     total_secretarias = query_one("SELECT COUNT(*) AS c FROM secretarias WHERE ativa=1")["c"]
@@ -228,6 +194,15 @@ def dashboard_stats():
         for r in query_all("SELECT status, COUNT(*) AS c FROM patrimonios GROUP BY status")
     }
 
+    compras_pendentes = query_one(
+        "SELECT COUNT(*) AS c FROM pedidos_compra WHERE status IN ('Enviado', 'Parcialmente Recebido')"
+    )["c"]
+    entregas_parciais = query_one(
+        "SELECT COUNT(*) AS c FROM pedidos_compra WHERE status = 'Parcialmente Recebido'"
+    )["c"]
+    patrimonios_emprestados = patrimonio_por_status.get("Emprestado", 0)
+    patrimonios_manutencao = patrimonio_por_status.get("Manutenção", 0)
+
     return {
         "total_secretarias": total_secretarias,
         "total_materiais": total_materiais,
@@ -238,4 +213,8 @@ def dashboard_stats():
         "emprestimos_atraso": emprestimos_atraso,
         "emprestimos_pendentes": emprestimos_pendentes,
         "patrimonio_por_status": patrimonio_por_status,
+        "compras_pendentes": compras_pendentes,
+        "entregas_parciais": entregas_parciais,
+        "patrimonios_emprestados": patrimonios_emprestados,
+        "patrimonios_manutencao": patrimonios_manutencao,
     }

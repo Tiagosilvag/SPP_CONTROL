@@ -11,6 +11,8 @@ STATUS_LIST = ["Disponível", "Em Uso", "Emprestado", "Manutenção"]
 def listar():
     q = request.args.get("q", "").strip()
     status = request.args.get("status", "")
+    secretaria_id = request.args.get("secretaria_id", type=int)
+    unidade_id = request.args.get("unidade_id", type=int)
     sql = """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome
              FROM patrimonios p
              JOIN materiais m ON m.id = p.material_id
@@ -24,10 +26,24 @@ def listar():
     if status:
         sql += " AND p.status=?"
         args.append(status)
+    if secretaria_id:
+        sql += " AND p.secretaria_proprietaria_id=?"
+        args.append(secretaria_id)
+    if unidade_id:
+        sql += " AND p.unidade_atual_id=?"
+        args.append(unidade_id)
     sql += " ORDER BY p.num_patrimonio"
     patrimonios = query_all(sql, tuple(args))
     return render_template(
-        "patrimonio/list.html", patrimonios=patrimonios, q=q, status=status, status_list=STATUS_LIST
+        "patrimonio/list.html",
+        patrimonios=patrimonios,
+        q=q,
+        status=status,
+        status_list=STATUS_LIST,
+        secretaria_id=secretaria_id,
+        unidade_id=unidade_id,
+        secretarias=query_all("SELECT * FROM secretarias ORDER BY nome"),
+        unidades=query_all("SELECT * FROM unidades ORDER BY nome"),
     )
 
 

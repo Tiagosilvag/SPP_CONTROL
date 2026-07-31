@@ -36,6 +36,11 @@
   'estoque': {'section': 'Estoque', 'label': 'Saldo em Estoque'},
   'patrimonio': {'section': 'Patrimônio', 'label': 'Bens Patrimoniais'},
   'mov_patrimonio': {'section': 'Patrimônio', 'label': 'Movimentações (Patrimônio)'},
+  'pedidos_compra': {'section': 'Compras', 'label': 'Pedidos de Compra'},
+  'licitacoes': {'section': 'Compras', 'label': 'Licitações'},
+  'relatorios': {'section': none, 'label': 'Relatórios'},
+  'auditoria': {'section': none, 'label': 'Auditoria'},
+  'usuarios': {'section': none, 'label': 'Usuários'},
   'cotacoes': {'section': none, 'label': 'Cotações'},
 } %}
 {% set current_nav = nav_map.get(request.blueprint, {'section': none, 'label': sistema_nome}) %}
@@ -82,11 +87,40 @@
         <li><span class="nav-section-title">Patrimônio</span></li>
         <li class="nav-item"><a href="{{ url_for('patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='patrimonio' }}"><i class="bi bi-tools"></i>Bens Patrimoniais</a></li>
         <li class="nav-item"><a href="{{ url_for('mov_patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_patrimonio' }}"><i class="bi bi-arrow-repeat"></i>Movimentações (Patrimônio)</a></li>
+
+        {% if current_user and current_user.perfil in ('Administrador', 'Gestor') %}
+        <li><span class="nav-section-title">Compras</span></li>
+        <li class="nav-item"><a href="{{ url_for('pedidos_compra.listar') }}" class="nav-link {{ 'active' if request.blueprint=='pedidos_compra' }}"><i class="bi bi-cart4"></i>Pedidos de Compra</a></li>
+        <li class="nav-item"><a href="{{ url_for('licitacoes.listar') }}" class="nav-link {{ 'active' if request.blueprint=='licitacoes' }}"><i class="bi bi-file-earmark-text"></i>Licitações</a></li>
+
+        <li><span class="nav-section-title">Sistema</span></li>
+        <li class="nav-item"><a href="{{ url_for('relatorios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='relatorios' }}"><i class="bi bi-file-earmark-bar-graph"></i>Relatórios</a></li>
+        <li class="nav-item"><a href="{{ url_for('auditoria.listar') }}" class="nav-link {{ 'active' if request.blueprint=='auditoria' }}"><i class="bi bi-journal-text"></i>Auditoria</a></li>
+        {% endif %}
+        {% if current_user and current_user.perfil == 'Administrador' %}
+        <li class="nav-item"><a href="{{ url_for('usuarios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='usuarios' }}"><i class="bi bi-people-fill"></i>Usuários</a></li>
+        {% endif %}
       </ul>
       {% endif %}
     </div>
 
-    <div class="sidebar-footer">SPP - Control &copy; {{ 2026 }}</div>
+    <div class="sidebar-footer">
+      {% if current_user %}
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <div class="text-truncate">
+          <div class="text-truncate" style="color: rgba(255,255,255,0.85); font-weight: 600; font-size: 0.8rem;">{{ current_user.nome }}</div>
+          <div style="font-size: 0.7rem;">{{ current_user.perfil }}</div>
+        </div>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <button type="submit" class="icon-btn" title="Sair" style="background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7);">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </form>
+      </div>
+      {% else %}
+      SPP - Control &copy; {{ 2026 }}
+      {% endif %}
+    </div>
   </nav>
 
   <div class="main-wrapper">

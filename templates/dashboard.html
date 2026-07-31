@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 {% from "_macros.html" import page_header, empty_row %}
 {% block content %}
-{{ page_header('bi-speedometer2', 'Painel Geral', subtitle='Visão consolidada de estoque, patrimônio e movimentações.') }}
+{{ page_header('bi-speedometer2', 'Painel Geral', subtitle='Visão consolidada de estoque, patrimônio, compras e movimentações.') }}
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-3">
   <div class="col-6 col-xl-3">
     <div class="card-stat">
       <div class="stat-tile">
-        <div>
-          <div class="stat-label">Secretarias Ativas</div>
-          <div class="stat-value">{{ stats.total_secretarias }}</div>
-        </div>
+        <div><div class="stat-label">Secretarias Ativas</div><div class="stat-value">{{ stats.total_secretarias }}</div></div>
         <span class="stat-icon badge-soft-info"><i class="bi bi-building"></i></span>
       </div>
     </div>
@@ -18,10 +15,7 @@
   <div class="col-6 col-xl-3">
     <div class="card-stat">
       <div class="stat-tile">
-        <div>
-          <div class="stat-label">Materiais Cadastrados</div>
-          <div class="stat-value">{{ stats.total_materiais }}</div>
-        </div>
+        <div><div class="stat-label">Materiais Cadastrados</div><div class="stat-value">{{ stats.total_materiais }}</div></div>
         <span class="stat-icon badge-soft-neutral"><i class="bi bi-box-seam"></i></span>
       </div>
     </div>
@@ -29,10 +23,7 @@
   <div class="col-6 col-xl-3">
     <div class="card-stat">
       <div class="stat-tile">
-        <div>
-          <div class="stat-label">Bens Patrimoniais</div>
-          <div class="stat-value">{{ stats.total_patrimonios }}</div>
-        </div>
+        <div><div class="stat-label">Bens Patrimoniais</div><div class="stat-value">{{ stats.total_patrimonios }}</div></div>
         <span class="stat-icon badge-soft-warning"><i class="bi bi-tools"></i></span>
       </div>
     </div>
@@ -40,11 +31,43 @@
   <div class="col-6 col-xl-3">
     <div class="card-stat">
       <div class="stat-tile">
-        <div>
-          <div class="stat-label">Empréstimos em Atraso</div>
-          <div class="stat-value {{ 'text-danger' if stats.emprestimos_atraso else '' }}">{{ stats.emprestimos_atraso }}</div>
-        </div>
+        <div><div class="stat-label">Empréstimos em Atraso</div><div class="stat-value {{ 'text-danger' if stats.emprestimos_atraso else '' }}">{{ stats.emprestimos_atraso }}</div></div>
         <span class="stat-icon badge-soft-danger"><i class="bi bi-exclamation-triangle-fill"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div><div class="stat-label">Compras Pendentes</div><div class="stat-value">{{ stats.compras_pendentes }}</div></div>
+        <span class="stat-icon badge-soft-info"><i class="bi bi-cart4"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div><div class="stat-label">Pedidos Atrasados</div><div class="stat-value {{ 'text-danger' if pedidos_atrasados else '' }}">{{ pedidos_atrasados|length }}</div></div>
+        <span class="stat-icon badge-soft-danger"><i class="bi bi-alarm"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div><div class="stat-label">Entregas Parciais</div><div class="stat-value">{{ stats.entregas_parciais }}</div></div>
+        <span class="stat-icon badge-soft-warning"><i class="bi bi-truck"></i></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card-stat">
+      <div class="stat-tile">
+        <div><div class="stat-label">Patrimônios Emprestados / Manutenção</div><div class="stat-value">{{ stats.patrimonios_emprestados }} / {{ stats.patrimonios_manutencao }}</div></div>
+        <span class="stat-icon badge-soft-neutral"><i class="bi bi-wrench-adjustable"></i></span>
       </div>
     </div>
   </div>
@@ -83,6 +106,37 @@
 
   <div class="col-lg-6">
     <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-alarm text-danger"></i> Pedidos de Compra Atrasados</div>
+      {% if pedidos_atrasados %}
+        <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead><tr><th>Pedido</th><th>Fornecedor</th><th>Previsão</th><th>Dias de Atraso</th></tr></thead>
+          <tbody>
+          {% for p in pedidos_atrasados %}
+            <tr>
+              <td><a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}">{{ p.numero_pedido }}</a></td>
+              <td>{{ p.fornecedor_nome or '-' }}</td>
+              <td>{{ p.previsao_entrega|brdate }}</td>
+              <td><span class="badge badge-soft-danger">{{ p.dias_atraso }} dia(s)</span></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        <a href="{{ url_for('pedidos_compra.listar') }}" class="small d-inline-block mt-3">Ver todos <i class="bi bi-arrow-right"></i></a>
+      {% else %}
+        <div class="empty-state py-4">
+          <i class="bi bi-check-circle"></i>
+          <div class="empty-state-title">Nenhum pedido atrasado</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="panel h-100">
       <div class="panel-title"><i class="bi bi-arrow-repeat"></i> Últimos Empréstimos de Patrimônio</div>
       {% if ultimos_emprestimos %}
         <div class="table-responsive">
@@ -114,9 +168,36 @@
       {% endif %}
     </div>
   </div>
+
+  <div class="col-lg-6">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-truck"></i> Próximas Entregas (7 dias)</div>
+      {% if pedidos_proximos %}
+        <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead><tr><th>Pedido</th><th>Fornecedor</th><th>Previsão</th></tr></thead>
+          <tbody>
+          {% for p in pedidos_proximos %}
+            <tr>
+              <td><a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}">{{ p.numero_pedido }}</a></td>
+              <td>{{ p.fornecedor_nome or '-' }}</td>
+              <td>{{ p.previsao_entrega|brdate }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      {% else %}
+        <div class="empty-state py-4">
+          <i class="bi bi-inbox"></i>
+          <div class="empty-state-title">Nenhuma entrega prevista</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
-<div class="panel">
+<div class="panel mb-3">
   <div class="panel-title"><i class="bi bi-box-arrow-in-down"></i> Últimas Entradas de Estoque</div>
   {% if ultimas_entradas %}
     <div class="table-responsive">
@@ -144,4 +225,56 @@
     </div>
   {% endif %}
 </div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-building"></i> Patrimônios por Secretaria</div>
+      <canvas id="chart-secretaria" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-truck"></i> Valor de Pedidos por Fornecedor</div>
+      <canvas id="chart-fornecedor" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-cone-striped"></i> Movimentações por Obra</div>
+      <canvas id="chart-obra" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+  var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  var textColor = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(20,21,26,0.65)';
+  Chart.defaults.color = textColor;
+  Chart.defaults.borderColor = gridColor;
+
+  function bar(id, labels, data, color) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    new Chart(el, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 6 }] },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  bar('chart-secretaria', {{ grafico_secretaria|map(attribute='label')|list|tojson }}, {{ grafico_secretaria|map(attribute='valor')|list|tojson }}, '#5b5bf5');
+  bar('chart-fornecedor', {{ grafico_fornecedor|map(attribute='label')|list|tojson }}, {{ grafico_fornecedor|map(attribute='valor')|list|tojson }}, '#16a34a');
+  bar('chart-obra', {{ grafico_obra|map(attribute='label')|list|tojson }}, {{ grafico_obra|map(attribute='valor')|list|tojson }}, '#d97706');
+})();
+</script>
 {% endblock %}

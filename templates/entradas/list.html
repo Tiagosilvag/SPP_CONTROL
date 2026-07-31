@@ -3,11 +3,54 @@
 {% block content %}
 {{ page_header('bi-box-arrow-in-down', 'Entradas de Estoque', action_url=url_for('entradas.nova'), action_label='Nova Entrada') }}
 
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-2">
+      <select class="form-select" name="secretaria_id" onchange="this.form.submit()">
+        <option value="">Secretaria</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if filtros.secretaria_id==s.id %}selected{% endif %}>{{ s.sigla }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="unidade_id" onchange="this.form.submit()">
+        <option value="">Unidade</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}" {% if filtros.unidade_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Obra</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if filtros.obra_id==o.id %}selected{% endif %}>{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="fornecedor_id" onchange="this.form.submit()">
+        <option value="">Fornecedor</option>
+        {% for f in fornecedores %}
+        <option value="{{ f.id }}" {% if filtros.fornecedor_id==f.id %}selected{% endif %}>{{ f.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_inicio" value="{{ filtros.data_inicio }}" title="De">
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_fim" value="{{ filtros.data_fim }}" title="Até" onchange="this.form.submit()">
+    </div>
+  </form>
+</div>
+
 <div class="table-card">
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Data</th><th>Material</th><th>Qtd.</th><th>Secretaria</th><th>Unidade Destino</th><th>Fornecedor</th><th>Nota Fiscal</th><th>Obra</th><th class="text-end">Ações</th></tr>
+    <tr><th>Data</th><th>Material</th><th>Qtd.</th><th>Secretaria</th><th>Unidade Destino</th><th>Fornecedor</th><th>Nota Fiscal</th><th>Obra</th><th>Pedido</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for e in entradas %}
@@ -21,6 +64,13 @@
       <td>{{ e.nota_fiscal or '-' }}</td>
       <td>{{ e.obra_descricao or '-' }}</td>
       <td>
+        {% if e.numero_pedido %}
+        <a href="{{ url_for('pedidos_compra.detalhe', id=e.pedido_id) }}" class="badge badge-soft-info text-decoration-none">{{ e.numero_pedido }}</a>
+        {% else %}
+        <span class="text-muted small">Manual</span>
+        {% endif %}
+      </td>
+      <td>
         <div class="row-actions">
           <form action="{{ url_for('entradas.excluir', id=e.id) }}" method="post" data-confirm="Confirma a exclusão desta entrada?">
             <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
@@ -29,7 +79,7 @@
       </td>
     </tr>
     {% else %}
-    {{ empty_row(9, 'Nenhuma entrada registrada.', 'bi-box-arrow-in-down') }}
+    {{ empty_row(10, 'Nenhuma entrada registrada.', 'bi-box-arrow-in-down') }}
     {% endfor %}
   </tbody>
 </table>

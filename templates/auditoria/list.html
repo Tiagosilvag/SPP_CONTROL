@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header('bi-journal-text', 'Auditoria', subtitle='Histórico de todas as operações de escrita realizadas no sistema (últimos 500 registros).') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-3">
+      <input type="text" class="form-control" name="usuario" value="{{ usuario_nome }}" placeholder="Usuário...">
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="tabela">
+        <option value="">Todas as tabelas</option>
+        {% for t in tabelas %}
+        <option value="{{ t }}" {% if tabela==t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="operacao">
+        <option value="">Toda operação</option>
+        {% for op in ['INSERT', 'UPDATE', 'DELETE'] %}
+        <option value="{{ op }}" {% if operacao==op %}selected{% endif %}>{{ op }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio }}">
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_fim" value="{{ data_fim }}">
+    </div>
+    <div class="col-md-1">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i></button>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr>
+      <th>Data/Hora</th><th>Usuário</th><th>IP</th><th>Operação</th><th>Tabela</th><th>Registro</th><th>Detalhes</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in registros %}
+    <tr>
+      <td>{{ r.data_hora.strftime('%d/%m/%Y %H:%M:%S') if r.data_hora else '-' }}</td>
+      <td>{{ r.usuario_nome or 'Sistema' }}</td>
+      <td class="text-muted small">{{ r.ip or '-' }}</td>
+      <td>
+        <span class="badge {{ 'badge-soft-success' if r.operacao=='INSERT' else ('badge-soft-warning' if r.operacao=='UPDATE' else 'badge-soft-danger') }}">{{ r.operacao }}</span>
+      </td>
+      <td>{{ r.tabela }}</td>
+      <td>#{{ r.registro_id or '-' }}</td>
+      <td>
+        {% if r.valor_anterior or r.valor_novo %}
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#aud-{{ r.id }}">
+          <i class="bi bi-eye"></i> Ver
+        </button>
+        {% else %}
+        <span class="text-muted small">—</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% if r.valor_anterior or r.valor_novo %}
+    <tr class="collapse" id="aud-{{ r.id }}">
+      <td colspan="7">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="small fw-semibold text-muted mb-1">Valor anterior</div>
+            <pre class="small p-2 rounded" style="background: var(--surface-muted); white-space: pre-wrap;">{{ r.valor_anterior or '—' }}</pre>
+          </div>
+          <div class="col-md-6">
+            <div class="small fw-semibold text-muted mb-1">Valor novo</div>
+            <pre class="small p-2 rounded" style="background: var(--surface-muted); white-space: pre-wrap;">{{ r.valor_novo or '—' }}</pre>
+          </div>
+        </div>
+      </td>
+    </tr>
+    {% endif %}
+    {% else %}
+    {{ empty_row(7, 'Nenhum registro de auditoria encontrado.', 'bi-journal-text') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

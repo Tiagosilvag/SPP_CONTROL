@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header(report.icon, report.label, subtitle='Filtre os dados e exporte em PDF ou Excel.') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get" id="filtros-form">
+    {% if 'secretaria_id' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <select class="form-select" name="secretaria_id">
+        <option value="">Secretaria</option>
+        {% for s in secretarias %}
+        <option value="{{ s.id }}" {% if filtros.secretaria_id==s.id %}selected{% endif %}>{{ s.sigla }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if 'unidade_id' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <select class="form-select" name="unidade_id">
+        <option value="">Unidade</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}" {% if filtros.unidade_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if 'obra_id' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <select class="form-select" name="obra_id">
+        <option value="">Obra</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if filtros.obra_id==o.id %}selected{% endif %}>{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if 'fornecedor_id' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <select class="form-select" name="fornecedor_id">
+        <option value="">Fornecedor</option>
+        {% for f in fornecedores %}
+        <option value="{{ f.id }}" {% if filtros.fornecedor_id==f.id %}selected{% endif %}>{{ f.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if 'status' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <select class="form-select" name="status">
+        <option value="">Status</option>
+        {% for st in status_options %}
+        <option value="{{ st }}" {% if filtros.status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if 'responsavel' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <input type="text" class="form-control" name="responsavel" value="{{ filtros.responsavel }}" placeholder="Responsável...">
+    </div>
+    {% endif %}
+    {% if 'data_inicio' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_inicio" value="{{ filtros.data_inicio }}" title="De">
+    </div>
+    {% endif %}
+    {% if 'data_fim' in filtros_aplicaveis %}
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_fim" value="{{ filtros.data_fim }}" title="Até">
+    </div>
+    {% endif %}
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Filtrar</button>
+    </div>
+  </form>
+</div>
+
+<div class="d-flex gap-2 mb-3">
+  <a href="#" id="btn-excel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</a>
+  <a href="#" id="btn-pdf" class="btn btn-danger btn-sm"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</a>
+  <span class="text-muted small align-self-center">{{ total_linhas }} registro(s) encontrados (exibindo até 50 na prévia)</span>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr>{% for key, label in colunas %}<th>{{ label }}</th>{% endfor %}</tr>
+  </thead>
+  <tbody>
+    {% for linha in linhas %}
+    <tr>{% for key, label in colunas %}<td>{{ linha[key] if linha[key] is not none else '-' }}</td>{% endfor %}</tr>
+    {% else %}
+    {{ empty_row(colunas|length, 'Nenhum registro encontrado para os filtros selecionados.') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+
+<script>
+(function () {
+  var form = document.getElementById('filtros-form');
+  function buildUrl(base) {
+    var params = new URLSearchParams(new FormData(form));
+    return base + '?' + params.toString();
+  }
+  document.getElementById('btn-excel').addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = buildUrl('{{ url_for("relatorios.excel", chave=chave) }}');
+  });
+  document.getElementById('btn-pdf').addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = buildUrl('{{ url_for("relatorios.pdf", chave=chave) }}');
+  });
+})();
+</script>
+{% endblock %}

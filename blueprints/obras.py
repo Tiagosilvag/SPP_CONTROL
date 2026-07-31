@@ -7,6 +7,8 @@ bp = Blueprint("obras", __name__)
 @bp.route("/")
 def listar():
     status = request.args.get("status", "")
+    secretaria_id = request.args.get("secretaria_id", type=int)
+    unidade_id = request.args.get("unidade_id", type=int)
     sql = """SELECT o.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome
              FROM obras o
              LEFT JOIN secretarias s ON s.id = o.secretaria_solicitante_id
@@ -16,9 +18,23 @@ def listar():
     if status:
         sql += " AND o.status=?"
         args.append(status)
+    if secretaria_id:
+        sql += " AND o.secretaria_solicitante_id=?"
+        args.append(secretaria_id)
+    if unidade_id:
+        sql += " AND o.unidade_local_id=?"
+        args.append(unidade_id)
     sql += " ORDER BY o.data_inicio DESC"
     obras = query_all(sql, tuple(args))
-    return render_template("obras/list.html", obras=obras, status=status)
+    return render_template(
+        "obras/list.html",
+        obras=obras,
+        status=status,
+        secretaria_id=secretaria_id,
+        unidade_id=unidade_id,
+        secretarias=query_all("SELECT * FROM secretarias ORDER BY nome"),
+        unidades=query_all("SELECT * FROM unidades ORDER BY nome"),
+    )
 
 
 @bp.route("/nova", methods=["GET", "POST"])

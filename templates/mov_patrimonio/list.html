@@ -3,15 +3,59 @@
 {% block content %}
 {{ page_header('bi-arrow-repeat', 'Movimentações de Patrimônio', action_url=url_for('mov_patrimonio.nova'), action_label='Nova Movimentação') }}
 
+<div class="d-flex flex-wrap gap-2 mb-3">
+  {% for qt in quick_tipos %}
+  <a href="{{ url_for('mov_patrimonio.nova', tipo=qt) }}" class="btn btn-sm btn-outline-primary">
+    <i class="bi bi-arrow-right-short"></i> {{ qt }}
+  </a>
+  {% endfor %}
+</div>
+
 <div class="filter-bar">
   <form class="row g-2" method="get">
-    <div class="col-md-3">
+    <div class="col-md-2">
       <select class="form-select" name="tipo" onchange="this.form.submit()">
         <option value="">Todos os tipos</option>
         {% for t in tipos %}
         <option value="{{ t }}" {% if tipo==t %}selected{% endif %}>{{ t }}</option>
         {% endfor %}
       </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="unidade_id" onchange="this.form.submit()">
+        <option value="">Unidade</option>
+        {% for u in unidades %}
+        <option value="{{ u.id }}" {% if filtros.unidade_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Obra</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if filtros.obra_id==o.id %}selected{% endif %}>{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" name="status_devolucao" onchange="this.form.submit()">
+        <option value="">Status devolução</option>
+        {% for st in ['Pendente', 'Devolvido', 'Em Atraso'] %}
+        <option value="{{ st }}" {% if filtros.status_devolucao==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_inicio" value="{{ filtros.data_inicio }}" title="De">
+    </div>
+    <div class="col-md-2">
+      <input type="date" class="form-control" name="data_fim" value="{{ filtros.data_fim }}" title="Até">
+    </div>
+    <div class="col-md-3">
+      <input type="text" class="form-control" name="responsavel" value="{{ filtros.responsavel }}" placeholder="Responsável...">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Filtrar</button>
     </div>
   </form>
 </div>
