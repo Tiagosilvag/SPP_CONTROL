@@ -11,6 +11,21 @@ _TABLE_RE = re.compile(
     r"^\s*(INSERT INTO|UPDATE|DELETE FROM)\s+(\w+)", re.IGNORECASE
 )
 _WHERE_ID_RE = re.compile(r"WHERE\s+id\s*=\s*%s\s*$", re.IGNORECASE)
+_INSERT_COLS_RE = re.compile(
+    r"(INSERT INTO\s+\w+\s*)\(([^()]*)\)(\s*VALUES\s*)\(([^()]*)\)", re.IGNORECASE
+)
+_WHERE_RE = re.compile(r"\bWHERE\b", re.IGNORECASE)
+
+# Tabelas de cadastro/movimentação onde db.execute() preenche sozinho
+# quem criou/alterou o registro e quando (colunas criado_por/criado_em/
+# atualizado_por/atualizado_em). Não inclui tabelas de item de linha
+# (sempre exibidas junto do registro pai) nem auditoria/permissões.
+TABELAS_RASTREADAS = {
+    "secretarias", "unidades", "materiais", "fornecedores", "obras",
+    "patrimonios", "entradas_estoque", "movimentacoes_consumiveis",
+    "movimentacoes_patrimonio", "pedidos_compra", "licitacoes", "cotacoes",
+    "recebimentos", "usuarios",
+}
 
 
 def _to_pg(sql):
@@ -107,19 +122,62 @@ def _log_auditoria(cur, operacao, tabela, registro_id, valor_anterior, valor_nov
     )
 
 
+def _injetar_criado_por(pg_sql, tabela, args, usuario_id):
+    """Acrescenta a coluna criado_por a um INSERT em tabela rastreada,
+    a menos que a própria query já a informe explicitamente."""
+    if usuario_id is None or tabela not in TABELAS_RASTREADAS:
+        return pg_sql, args
+    match = _INSERT_COLS_RE.search(pg_sql)
+    if not match or re.search(r"\bcriado_por\b", match.group(2), re.IGNORECASE):
+        return pg_sql, args
+    prefixo, colunas, values_kw, placeholders = match.groups()
+    trecho_novo = f"{prefixo}({colunas}, criado_por){values_kw}({placeholders}, %s)"
+    pg_sql = pg_sql[: match.start()] + trecho_novo + pg_sql[match.end():]
+    return pg_sql, args + (usuario_id,)
+
+
+def _injetar_atualizado_por(pg_sql, tabela, args, usuario_id):
+    """Acrescenta atualizado_por/atualizado_em a um UPDATE em tabela
+    rastreada, inserindo o novo argumento na penúltima posição — o
+    último continua sendo o id do WHERE, como em todo o projeto."""
+    if usuario_id is None or tabela not in TABELAS_RASTREADAS:
+        return pg_sql, args
+    match = _WHERE_RE.search(pg_sql)
+    if not match:
+        return pg_sql, args
+    pg_sql = pg_sql[: match.start()] + ", atualizado_por = %s, atualizado_em = now() " + pg_sql[match.start():]
+    args = (args[:-1] + (usuario_id,) + args[-1:]) if args else (usuario_id,)
+    return pg_sql, args
+
+
 def execute(sql, args=(), audit=True):
     """Executa INSERT/UPDATE/DELETE. Para INSERT, retorna o id gerado
     (equivalente ao lastrowid do sqlite3), usando RETURNING id.
 
-    Quando audit=True (padrão) e a tabela não é 'auditoria', registra a
-    operação em auditoria dentro da mesma transação. A captura de
-    valor_anterior/valor_novo só é possível quando a query segue o padrão
-    'WHERE id=?' usado em todo o projeto (o id é sempre o último argumento).
+    Quando audit=True (padrão):
+      - a operação é registrada em auditoria dentro da mesma transação
+        (valor_anterior/valor_novo só são capturados quando a query
+        segue o padrão 'WHERE id=?' usado em todo o projeto, já que o
+        id é sempre o último argumento);
+      - em tabelas de TABELAS_RASTREADAS, INSERT ganha criado_por
+        automaticamente e UPDATE ganha atualizado_por/atualizado_em,
+        sem precisar tocar no SQL de cada blueprint.
+    audit=False desliga as duas coisas de uma vez — usado só para
+    alterações internas/derivadas (ex: recálculo automático de status),
+    que não representam uma edição feita pelo usuário.
     """
     db = get_db()
     pg_sql = _to_pg(sql)
     match = _TABLE_RE.match(pg_sql)
     operacao, tabela = (match.group(1).split()[0].upper(), match.group(2)) if match else (None, None)
+
+    if audit and operacao == "INSERT":
+        usuario_id, _ = _current_user_info()
+        pg_sql, args = _injetar_criado_por(pg_sql, tabela, args, usuario_id)
+    elif audit and operacao == "UPDATE":
+        usuario_id, _ = _current_user_info()
+        pg_sql, args = _injetar_atualizado_por(pg_sql, tabela, args, usuario_id)
+
     is_insert = operacao == "INSERT" and "RETURNING" not in pg_sql.upper()
     if is_insert:
         pg_sql += " RETURNING id"

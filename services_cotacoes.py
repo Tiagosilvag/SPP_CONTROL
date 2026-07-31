@@ -7,7 +7,7 @@ from db import query_all, query_one
 
 
 def listar_cotacoes(obra_id=None, q=None, categoria=None, modalidade=None):
-    sql = """SELECT c.*, o.descricao AS obra_descricao,
+    sql = """SELECT c.*, o.descricao AS obra_descricao, uc.nome AS criado_por_nome,
                     (SELECT ci.valor_cotado FROM cotacoes_itens ci
                        WHERE ci.cotacao_id = c.id AND ci.vencedor = 1 LIMIT 1) AS valor_vencedor,
                     (SELECT f.nome FROM cotacoes_itens ci
@@ -16,6 +16,7 @@ def listar_cotacoes(obra_id=None, q=None, categoria=None, modalidade=None):
                     (SELECT COUNT(*) FROM cotacoes_itens ci WHERE ci.cotacao_id = c.id) AS total_fornecedores
              FROM cotacoes c
              JOIN obras o ON o.id = c.obra_id
+             LEFT JOIN usuarios uc ON uc.id = c.criado_por
              WHERE 1=1"""
     args = []
     if obra_id:

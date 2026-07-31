@@ -50,7 +50,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Data</th><th>Material</th><th>Qtd.</th><th>Secretaria</th><th>Unidade Destino</th><th>Fornecedor</th><th>Nota Fiscal</th><th>Obra</th><th>Pedido</th><th class="text-end">Ações</th></tr>
+    <tr><th>Data</th><th>Material</th><th>Qtd.</th><th>Secretaria</th><th>Unidade Destino</th><th>Fornecedor</th><th>Nota Fiscal</th><th>Obra</th><th>Pedido</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for e in entradas %}
@@ -70,6 +70,7 @@
         <span class="text-muted small">Manual</span>
         {% endif %}
       </td>
+      <td class="text-muted small">{{ e.criado_por_nome or '-' }}</td>
       <td>
         <div class="row-actions">
           <form action="{{ url_for('entradas.excluir', id=e.id) }}" method="post" data-confirm="Confirma a exclusão desta entrada?">
@@ -79,7 +80,7 @@
       </td>
     </tr>
     {% else %}
-    {{ empty_row(10, 'Nenhuma entrada registrada.', 'bi-box-arrow-in-down') }}
+    {{ empty_row(11, 'Nenhuma entrada registrada.', 'bi-box-arrow-in-down') }}
     {% endfor %}
   </tbody>
 </table>

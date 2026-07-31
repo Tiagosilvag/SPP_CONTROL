@@ -42,7 +42,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Nº Patrimônio</th><th>Material</th><th>Secretaria</th><th>Unidade Atual</th><th>Estado</th><th>Status</th><th class="text-end">Ações</th></tr>
+    <tr><th>Nº Patrimônio</th><th>Material</th><th>Secretaria</th><th>Unidade Atual</th><th>Estado</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for p in patrimonios %}
@@ -55,10 +55,11 @@
       <td>
         <span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger'}[p.status] }}">{{ p.status }}</span>
       </td>
+      <td class="text-muted small">{{ p.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('patrimonio.editar', id=p.id), url_for('patrimonio.excluir', id=p.id), 'Confirma a exclusão do bem ' ~ p.num_patrimonio ~ '?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(7, 'Nenhum bem patrimonial cadastrado.', 'bi-tools') }}
+    {{ empty_row(8, 'Nenhum bem patrimonial cadastrado.', 'bi-tools') }}
     {% endfor %}
   </tbody>
 </table>

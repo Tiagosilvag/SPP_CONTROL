@@ -16,7 +16,7 @@ def listar():
     sql = """SELECT e.*, m.nome AS material_nome, m.unidade_medida,
                     s.sigla AS secretaria_sigla, u.nome AS unidade_nome,
                     f.nome AS fornecedor_nome, o.descricao AS obra_descricao,
-                    p.numero_pedido, p.id AS pedido_id
+                    p.numero_pedido, p.id AS pedido_id, uc.nome AS criado_por_nome
              FROM entradas_estoque e
              JOIN materiais m ON m.id = e.material_id
              LEFT JOIN secretarias s ON s.id = e.secretaria_proprietaria_id
@@ -25,6 +25,7 @@ def listar():
              LEFT JOIN obras o ON o.id = e.obra_id
              LEFT JOIN pedidos_compra_itens pci ON pci.id = e.pedido_item_id
              LEFT JOIN pedidos_compra p ON p.id = pci.pedido_id
+             LEFT JOIN usuarios uc ON uc.id = e.criado_por
              WHERE 1=1"""
     args = []
     if secretaria_id:

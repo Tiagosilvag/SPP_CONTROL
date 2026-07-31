@@ -76,7 +76,7 @@
 <table class="table table-hover align-middle mb-0">
   <thead>
     <tr>
-      <th>Número</th><th>Data</th><th>Secretaria/Unidade</th><th>Fornecedor</th><th>Responsável</th><th>Status</th><th class="text-end">Ações</th>
+      <th>Número</th><th>Data</th><th>Secretaria/Unidade</th><th>Fornecedor</th><th>Responsável</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -91,12 +91,13 @@
         {% set badge = {'Em Elaboração': 'badge-soft-neutral', 'Enviado': 'badge-soft-info', 'Parcialmente Recebido': 'badge-soft-warning', 'Recebido': 'badge-soft-success', 'Cancelado': 'badge-soft-danger'} %}
         <span class="badge {{ badge.get(p.status, 'badge-soft-neutral') }}">{{ p.status }}</span>
       </td>
+      <td class="text-muted small">{{ p.criado_por_nome or '-' }}</td>
       <td class="text-end">
         <a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}" class="btn btn-sm btn-outline-primary" title="Ver detalhes"><i class="bi bi-eye"></i></a>
       </td>
     </tr>
     {% else %}
-    {{ empty_row(7, 'Nenhum pedido de compra cadastrado.', 'bi-cart4') }}
+    {{ empty_row(8, 'Nenhum pedido de compra cadastrado.', 'bi-cart4') }}
     {% endfor %}
   </tbody>
 </table>

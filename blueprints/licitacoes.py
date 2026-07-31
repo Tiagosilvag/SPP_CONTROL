@@ -15,7 +15,8 @@ def listar():
     categoria = request.args.get("categoria", "")
     modalidade = request.args.get("modalidade", "")
 
-    sql = "SELECT * FROM licitacoes WHERE 1=1"
+    sql = """SELECT l.*, uc.nome AS criado_por_nome
+             FROM licitacoes l LEFT JOIN usuarios uc ON uc.id = l.criado_por WHERE 1=1"""
     args = []
     if q:
         sql += " AND (objeto ILIKE ? OR processo ILIKE ?)"

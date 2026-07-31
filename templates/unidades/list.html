@@ -20,7 +20,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Nome</th><th>Secretaria</th><th>Endereço</th><th>Responsável Local</th><th>Status</th><th class="text-end">Ações</th></tr>
+    <tr><th>Nome</th><th>Secretaria</th><th>Endereço</th><th>Responsável Local</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for u in unidades %}
@@ -30,10 +30,11 @@
       <td>{{ u.endereco or '-' }}</td>
       <td>{{ u.responsavel_local or '-' }}</td>
       <td>{% if u.ativa %}<span class="badge badge-soft-success">Ativa</span>{% else %}<span class="badge badge-soft-neutral">Inativa</span>{% endif %}</td>
+      <td class="text-muted small">{{ u.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('unidades.editar', id=u.id), url_for('unidades.excluir', id=u.id), 'Confirma a exclusão da unidade ' ~ u.nome ~ '?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(6, 'Nenhuma unidade cadastrada.', 'bi-geo-alt') }}
+    {{ empty_row(7, 'Nenhuma unidade cadastrada.', 'bi-geo-alt') }}
     {% endfor %}
   </tbody>
 </table>

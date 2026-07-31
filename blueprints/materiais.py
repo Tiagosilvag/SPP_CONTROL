@@ -10,15 +10,16 @@ CATEGORIAS = ["Construção", "Pintura", "Elétrico", "Hidráulico", "Ferramenta
 def listar():
     q = request.args.get("q", "").strip()
     tipo = request.args.get("tipo", "")
-    sql = "SELECT * FROM materiais WHERE 1=1"
+    sql = """SELECT m.*, uc.nome AS criado_por_nome
+             FROM materiais m LEFT JOIN usuarios uc ON uc.id = m.criado_por WHERE 1=1"""
     args = []
     if q:
-        sql += " AND nome LIKE ?"
+        sql += " AND m.nome LIKE ?"
         args.append(f"%{q}%")
     if tipo:
-        sql += " AND tipo_material=?"
+        sql += " AND m.tipo_material=?"
         args.append(tipo)
-    sql += " ORDER BY nome"
+    sql += " ORDER BY m.nome"
     materiais = query_all(sql, tuple(args))
     return render_template("materiais/list.html", materiais=materiais, q=q, tipo=tipo)
 

@@ -13,11 +13,13 @@ def listar():
     status = request.args.get("status", "")
     secretaria_id = request.args.get("secretaria_id", type=int)
     unidade_id = request.args.get("unidade_id", type=int)
-    sql = """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome
+    sql = """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome,
+                    uc.nome AS criado_por_nome
              FROM patrimonios p
              JOIN materiais m ON m.id = p.material_id
              LEFT JOIN secretarias s ON s.id = p.secretaria_proprietaria_id
              LEFT JOIN unidades u ON u.id = p.unidade_atual_id
+             LEFT JOIN usuarios uc ON uc.id = p.criado_por
              WHERE 1=1"""
     args = []
     if q:
@@ -50,11 +52,13 @@ def listar():
 @bp.route("/<int:id>")
 def detalhe(id):
     p = query_one(
-        """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome
+        """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome,
+                  uc.nome AS criado_por_nome
            FROM patrimonios p
            JOIN materiais m ON m.id = p.material_id
            LEFT JOIN secretarias s ON s.id = p.secretaria_proprietaria_id
            LEFT JOIN unidades u ON u.id = p.unidade_atual_id
+           LEFT JOIN usuarios uc ON uc.id = p.criado_por
            WHERE p.id=?""",
         (id,),
     )
@@ -62,10 +66,12 @@ def detalhe(id):
         flash("Bem patrimonial não encontrado.", "danger")
         return redirect(url_for("patrimonio.listar"))
     historico = query_all(
-        """SELECT mp.*, uo.nome AS unidade_origem_nome, ud.nome AS unidade_destino_nome
+        """SELECT mp.*, uo.nome AS unidade_origem_nome, ud.nome AS unidade_destino_nome,
+                  uc.nome AS criado_por_nome
            FROM movimentacoes_patrimonio mp
            LEFT JOIN unidades uo ON uo.id = mp.unidade_origem_id
            LEFT JOIN unidades ud ON ud.id = mp.unidade_destino_id
+           LEFT JOIN usuarios uc ON uc.id = mp.criado_por
            WHERE mp.patrimonio_id=? ORDER BY mp.data_movimentacao DESC""",
         (id,),
     )

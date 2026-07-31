@@ -56,11 +56,13 @@ def listar():
     data_inicio = request.args.get("data_inicio", "")
     data_fim = request.args.get("data_fim", "")
 
-    sql = """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome
+    sql = """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome,
+                    uc.nome AS criado_por_nome
              FROM pedidos_compra p
              LEFT JOIN secretarias s ON s.id = p.secretaria_id
              LEFT JOIN unidades u ON u.id = p.unidade_id
              LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
+             LEFT JOIN usuarios uc ON uc.id = p.criado_por
              WHERE 1=1"""
     args = []
     if secretaria_id:
@@ -164,11 +166,13 @@ def novo():
 @roles_required("Administrador", "Gestor")
 def detalhe(id):
     pedido = query_one(
-        """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome
+        """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome,
+                  uc.nome AS criado_por_nome
            FROM pedidos_compra p
            LEFT JOIN secretarias s ON s.id = p.secretaria_id
            LEFT JOIN unidades u ON u.id = p.unidade_id
            LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
+           LEFT JOIN usuarios uc ON uc.id = p.criado_por
            WHERE p.id=?""",
         (id,),
     )
@@ -177,7 +181,10 @@ def detalhe(id):
         return redirect(url_for("pedidos_compra.listar"))
     itens = itens_pedido(id)
     recebimentos = query_all(
-        "SELECT * FROM recebimentos WHERE pedido_id=? ORDER BY data_recebimento DESC, id DESC", (id,)
+        """SELECT r.*, uc.nome AS criado_por_nome FROM recebimentos r
+           LEFT JOIN usuarios uc ON uc.id = r.criado_por
+           WHERE r.pedido_id=? ORDER BY r.data_recebimento DESC, r.id DESC""",
+        (id,),
     )
     return render_template("pedidos_compra/detalhe.html", pedido=pedido, itens=itens, recebimentos=recebimentos)
 

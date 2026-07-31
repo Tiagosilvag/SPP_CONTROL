@@ -16,6 +16,7 @@
         <div class="col-6 col-md-4"><div class="small text-muted">Unidade</div>{{ pedido.unidade_nome or '-' }}</div>
         <div class="col-6 col-md-4"><div class="small text-muted">Fornecedor</div>{{ pedido.fornecedor_nome or '-' }}</div>
         <div class="col-6 col-md-4"><div class="small text-muted">Responsável</div>{{ pedido.responsavel or '-' }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Cadastrado por</div>{{ pedido.criado_por_nome or '-' }}</div>
         {% if pedido.observacoes %}<div class="col-12"><div class="small text-muted">Observações</div>{{ pedido.observacoes }}</div>{% endif %}
       </div>
     </div>
@@ -65,7 +66,7 @@
   {% if recebimentos %}
   <div class="table-responsive">
   <table class="table table-sm table-hover mb-0">
-    <thead><tr><th>Data</th><th>Nota Fiscal</th><th>Responsável</th><th>Observações</th></tr></thead>
+    <thead><tr><th>Data</th><th>Nota Fiscal</th><th>Responsável</th><th>Observações</th><th>Registrado por</th></tr></thead>
     <tbody>
     {% for r in recebimentos %}
       <tr>
@@ -73,6 +74,7 @@
         <td>{{ r.nota_fiscal or '-' }}</td>
         <td>{{ r.responsavel or '-' }}</td>
         <td>{{ r.observacoes or '-' }}</td>
+        <td class="text-muted small">{{ r.criado_por_nome or '-' }}</td>
       </tr>
     {% endfor %}
     </tbody>

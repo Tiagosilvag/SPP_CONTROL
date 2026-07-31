@@ -18,7 +18,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Nome</th><th>CNPJ</th><th>Contato</th><th>Status</th><th class="text-end">Ações</th></tr>
+    <tr><th>Nome</th><th>CNPJ</th><th>Contato</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for f in fornecedores %}
@@ -27,10 +27,11 @@
       <td>{{ f.cnpj or '-' }}</td>
       <td>{{ f.contato or '-' }}</td>
       <td>{% if f.ativo %}<span class="badge badge-soft-success">Ativo</span>{% else %}<span class="badge badge-soft-neutral">Inativo</span>{% endif %}</td>
+      <td class="text-muted small">{{ f.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('fornecedores.editar', id=f.id), url_for('fornecedores.excluir', id=f.id), 'Confirma a exclusão do fornecedor ' ~ f.nome ~ '?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(5, 'Nenhum fornecedor cadastrado.', 'bi-truck') }}
+    {{ empty_row(6, 'Nenhum fornecedor cadastrado.', 'bi-truck') }}
     {% endfor %}
   </tbody>
 </table>

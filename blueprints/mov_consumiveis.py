@@ -17,12 +17,13 @@ def listar():
 
     sql = """SELECT mc.*, m.nome AS material_nome, m.unidade_medida,
                      uo.nome AS unidade_origem_nome, ud.nome AS unidade_destino_nome,
-                     o.descricao AS obra_descricao
+                     o.descricao AS obra_descricao, uc.nome AS criado_por_nome
               FROM movimentacoes_consumiveis mc
               JOIN materiais m ON m.id = mc.material_id
               LEFT JOIN unidades uo ON uo.id = mc.unidade_origem_id
               LEFT JOIN unidades ud ON ud.id = mc.unidade_destino_id
               LEFT JOIN obras o ON o.id = mc.obra_id
+              LEFT JOIN usuarios uc ON uc.id = mc.criado_por
               WHERE 1=1"""
     args = []
     if tipo:

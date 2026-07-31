@@ -34,7 +34,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Processo</th><th>Objeto</th><th>Categoria</th><th>Modalidade</th><th>Valor Estimado</th><th>Valor Homologado</th><th class="text-end">Ações</th></tr>
+    <tr><th>Processo</th><th>Objeto</th><th>Categoria</th><th>Modalidade</th><th>Valor Estimado</th><th>Valor Homologado</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for l in licitacoes %}
@@ -45,10 +45,11 @@
       <td>{{ l.modalidade or '-' }}</td>
       <td>R$ {{ '%.2f'|format(l.valor_estimado) }}</td>
       <td>{{ ('R$ %.2f'|format(l.valor_homologado)) if l.valor_homologado is not none else '-' }}</td>
+      <td class="text-muted small">{{ l.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('licitacoes.editar', id=l.id), url_for('licitacoes.excluir', id=l.id), 'Confirma a exclusão desta licitação?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(7, 'Nenhuma licitação cadastrada.', 'bi-file-earmark-text') }}
+    {{ empty_row(8, 'Nenhuma licitação cadastrada.', 'bi-file-earmark-text') }}
     {% endfor %}
   </tbody>
 </table>

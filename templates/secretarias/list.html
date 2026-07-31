@@ -18,7 +18,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Sigla</th><th>Nome</th><th>Responsável</th><th>Contato</th><th>Status</th><th class="text-end">Ações</th></tr>
+    <tr><th>Sigla</th><th>Nome</th><th>Responsável</th><th>Contato</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for s in secretarias %}
@@ -30,10 +30,11 @@
       <td>
         {% if s.ativa %}<span class="badge badge-soft-success">Ativa</span>{% else %}<span class="badge badge-soft-neutral">Inativa</span>{% endif %}
       </td>
+      <td class="text-muted small">{{ s.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('secretarias.editar', id=s.id), url_for('secretarias.excluir', id=s.id), 'Confirma a exclusão da secretaria ' ~ s.sigla ~ '?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(6, 'Nenhuma secretaria cadastrada.', 'bi-building') }}
+    {{ empty_row(7, 'Nenhuma secretaria cadastrada.', 'bi-building') }}
     {% endfor %}
   </tbody>
 </table>

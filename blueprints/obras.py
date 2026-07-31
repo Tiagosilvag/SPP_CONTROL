@@ -9,10 +9,11 @@ def listar():
     status = request.args.get("status", "")
     secretaria_id = request.args.get("secretaria_id", type=int)
     unidade_id = request.args.get("unidade_id", type=int)
-    sql = """SELECT o.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome
+    sql = """SELECT o.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, uc.nome AS criado_por_nome
              FROM obras o
              LEFT JOIN secretarias s ON s.id = o.secretaria_solicitante_id
              LEFT JOIN unidades u ON u.id = o.unidade_local_id
+             LEFT JOIN usuarios uc ON uc.id = o.criado_por
              WHERE 1=1"""
     args = []
     if status:

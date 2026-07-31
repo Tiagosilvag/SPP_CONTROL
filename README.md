@@ -57,6 +57,13 @@ que já existe.
 - **Auditoria**: toda operação de escrita feita pela aplicação é registrada
   automaticamente (usuário, data/hora, IP, tabela, valor anterior e novo),
   na mesma transação da alteração.
+- **Rastreio de criação/edição**: cadastros e movimentações também têm suas
+  próprias colunas `criado_por`/`criado_em`/`atualizado_por`/`atualizado_em`,
+  preenchidas sozinhas por `db.execute()` (ver `TABELAS_RASTREADAS` em
+  `db.py`) — os blueprints não precisam informar isso manualmente. No
+  front, só o nome de quem cadastrou/movimentou aparece (coluna
+  "Cadastrado por"/"Registrado por"); os detalhes completos de cada
+  alteração ficam no módulo de Auditoria.
 
 ---
 

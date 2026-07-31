@@ -7,8 +7,10 @@ bp = Blueprint("unidades", __name__)
 @bp.route("/")
 def listar():
     secretaria_id = request.args.get("secretaria_id", type=int)
-    sql = """SELECT u.*, s.sigla AS secretaria_sigla, s.nome AS secretaria_nome
-              FROM unidades u LEFT JOIN secretarias s ON s.id = u.secretaria_id"""
+    sql = """SELECT u.*, s.sigla AS secretaria_sigla, s.nome AS secretaria_nome, uc.nome AS criado_por_nome
+              FROM unidades u
+              LEFT JOIN secretarias s ON s.id = u.secretaria_id
+              LEFT JOIN usuarios uc ON uc.id = u.criado_por"""
     args = ()
     if secretaria_id:
         sql += " WHERE u.secretaria_id=?"

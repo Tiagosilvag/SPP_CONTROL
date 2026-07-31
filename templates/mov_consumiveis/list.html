@@ -64,7 +64,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Data</th><th>Tipo</th><th>Material</th><th>Qtd.</th><th>Origem</th><th>Destino</th><th>Obra</th><th>Status</th><th>Responsável</th><th class="text-end">Ações</th></tr>
+    <tr><th>Data</th><th>Tipo</th><th>Material</th><th>Qtd.</th><th>Origem</th><th>Destino</th><th>Obra</th><th>Status</th><th>Responsável</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for m in movs %}
@@ -82,6 +82,7 @@
         {% else %}-{% endif %}
       </td>
       <td>{{ m.responsavel or '-' }}</td>
+      <td class="text-muted small">{{ m.criado_por_nome or '-' }}</td>
       <td>
         <div class="row-actions">
           <form action="{{ url_for('mov_consumiveis.excluir', id=m.id) }}" method="post" data-confirm="Confirma a exclusão desta movimentação?">
@@ -91,7 +92,7 @@
       </td>
     </tr>
     {% else %}
-    {{ empty_row(10, 'Nenhuma movimentação registrada.', 'bi-arrow-left-right') }}
+    {{ empty_row(11, 'Nenhuma movimentação registrada.', 'bi-arrow-left-right') }}
     {% endfor %}
   </tbody>
 </table>

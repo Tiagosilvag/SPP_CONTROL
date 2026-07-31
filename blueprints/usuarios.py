@@ -8,7 +8,11 @@ bp = Blueprint("usuarios", __name__)
 @bp.route("/")
 @roles_required("Administrador")
 def listar():
-    usuarios = query_all("SELECT * FROM usuarios ORDER BY nome")
+    usuarios = query_all(
+        """SELECT u.*, uc.nome AS criado_por_nome
+           FROM usuarios u LEFT JOIN usuarios uc ON uc.id = u.criado_por
+           ORDER BY u.nome"""
+    )
     return render_template("usuarios/list.html", usuarios=usuarios)
 
 

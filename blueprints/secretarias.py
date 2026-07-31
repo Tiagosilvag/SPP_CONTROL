@@ -7,13 +7,14 @@ bp = Blueprint("secretarias", __name__)
 @bp.route("/")
 def listar():
     q = request.args.get("q", "").strip()
+    sql = """SELECT s.*, uc.nome AS criado_por_nome
+             FROM secretarias s LEFT JOIN usuarios uc ON uc.id = s.criado_por"""
     if q:
-        secretarias = query_all(
-            "SELECT * FROM secretarias WHERE nome LIKE ? OR sigla LIKE ? ORDER BY nome",
-            (f"%{q}%", f"%{q}%"),
-        )
+        sql += " WHERE s.nome LIKE ? OR s.sigla LIKE ? ORDER BY s.nome"
+        secretarias = query_all(sql, (f"%{q}%", f"%{q}%"))
     else:
-        secretarias = query_all("SELECT * FROM secretarias ORDER BY nome")
+        sql += " ORDER BY s.nome"
+        secretarias = query_all(sql)
     return render_template("secretarias/list.html", secretarias=secretarias, q=q)
 
 

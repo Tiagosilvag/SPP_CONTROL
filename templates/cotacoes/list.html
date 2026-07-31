@@ -90,7 +90,7 @@
 <table class="table table-hover align-middle mb-0">
   <thead>
     <tr>
-      <th>Data</th><th>Obra</th><th>Descrição</th><th>Fornecedores</th><th>Vencedor</th><th>Valor Estimado</th><th>Economia</th><th class="text-end">Ações</th>
+      <th>Data</th><th>Obra</th><th>Descrição</th><th>Fornecedores</th><th>Vencedor</th><th>Valor Estimado</th><th>Economia</th><th>Cadastrado por</th><th class="text-end">Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -111,10 +111,11 @@
         <span class="text-muted small">Sem vencedor definido</span>
         {% endif %}
       </td>
+      <td class="text-muted small">{{ c.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('cotacoes.editar', id=c.id), url_for('cotacoes.excluir', id=c.id), 'Confirma a exclusão desta cotação?') }}</td>
     </tr>
     {% else %}
-    {{ empty_row(8, 'Nenhuma cotação cadastrada.', 'bi-graph-up-arrow') }}
+    {{ empty_row(9, 'Nenhuma cotação cadastrada.', 'bi-graph-up-arrow') }}
     {% endfor %}
   </tbody>
 </table>

@@ -38,6 +38,10 @@
       <div class="stat-label">Aquisição</div>
       <div class="fw-semibold">{{ p.data_aquisicao|brdate }}</div>
     </div>
+    <div class="col-md-4">
+      <div class="stat-label">Cadastrado por</div>
+      <div class="fw-semibold">{{ p.criado_por_nome or '-' }}</div>
+    </div>
   </div>
 </div>
 
@@ -46,7 +50,7 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Data</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Prev. Devolução</th><th>Devolvido em</th><th>Status</th><th>Responsável</th></tr>
+    <tr><th>Data</th><th>Tipo</th><th>Origem</th><th>Destino</th><th>Prev. Devolução</th><th>Devolvido em</th><th>Status</th><th>Responsável</th><th>Registrado por</th></tr>
   </thead>
   <tbody>
     {% for m in historico %}
@@ -59,9 +63,10 @@
       <td>{{ m.data_real_devolucao|brdate }}</td>
       <td>{{ m.status_devolucao }}</td>
       <td>{{ m.responsavel or '-' }}</td>
+      <td class="text-muted small">{{ m.criado_por_nome or '-' }}</td>
     </tr>
     {% else %}
-    {{ empty_row(8, 'Nenhuma movimentação registrada para este bem.', 'bi-clock-history') }}
+    {{ empty_row(9, 'Nenhuma movimentação registrada para este bem.', 'bi-clock-history') }}
     {% endfor %}
   </tbody>
 </table>

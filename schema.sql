@@ -257,3 +257,67 @@ CREATE TABLE IF NOT EXISTS usuario_permissoes (
     menu_chave TEXT NOT NULL,
     UNIQUE (usuario_id, menu_chave)
 );
+
+-- Rastreio de quem cadastrou/alterou cada registro e quando. Preenchido
+-- sozinho por db.execute() (ver TABELAS_RASTREADAS em db.py) — os
+-- blueprints não precisam informar isso manualmente.
+ALTER TABLE secretarias ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE secretarias ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE secretarias ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE secretarias ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE unidades ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE unidades ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE unidades ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE unidades ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE materiais ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE materiais ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE materiais ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE materiais ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE fornecedores ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE fornecedores ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE fornecedores ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE fornecedores ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE patrimonios ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE patrimonios ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE patrimonios ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE patrimonios ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE entradas_estoque ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE entradas_estoque ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE entradas_estoque ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE entradas_estoque ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE movimentacoes_consumiveis ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS criado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP NOT NULL DEFAULT now();
+ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE movimentacoes_patrimonio ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+-- Estas já tinham criado_por/criado_em — só falta atualizado_*.
+ALTER TABLE pedidos_compra ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE pedidos_compra ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE licitacoes ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE licitacoes ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE cotacoes ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE cotacoes ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE recebimentos ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE recebimentos ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;

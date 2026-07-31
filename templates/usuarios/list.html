@@ -8,7 +8,7 @@
 <table class="table table-hover align-middle mb-0">
   <thead>
     <tr>
-      <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Último acesso</th><th>Criado em</th><th>Status</th><th class="text-end">Ações</th>
+      <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Último acesso</th><th>Criado em</th><th>Criado por</th><th>Status</th><th class="text-end">Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -19,11 +19,12 @@
       <td><span class="badge badge-soft-info">{{ u.perfil }}</span></td>
       <td>{{ u.ultimo_acesso.strftime('%d/%m/%Y %H:%M') if u.ultimo_acesso else 'Nunca acessou' }}</td>
       <td>{{ u.criado_em.strftime('%d/%m/%Y') if u.criado_em else '-' }}</td>
+      <td class="text-muted small">{{ u.criado_por_nome or '-' }}</td>
       <td><span class="badge {{ 'badge-soft-success' if u.ativo else 'badge-soft-neutral' }}">{{ 'Ativo' if u.ativo else 'Inativo' }}</span></td>
       <td>{{ row_actions(url_for('usuarios.editar', id=u.id)) }}</td>
     </tr>
     {% else %}
-    {{ empty_row(7, 'Nenhum usuário cadastrado.', 'bi-people') }}
+    {{ empty_row(8, 'Nenhum usuário cadastrado.', 'bi-people') }}
     {% endfor %}
   </tbody>
 </table>
