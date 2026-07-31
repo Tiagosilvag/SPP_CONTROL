@@ -44,8 +44,14 @@
   'cotacoes': {'section': none, 'label': 'Cotações'},
 } %}
 {% set current_nav = nav_map.get(request.blueprint, {'section': none, 'label': sistema_nome}) %}
+{% set movimentacoes_blueprints = ['mov_consumiveis', 'mov_patrimonio'] %}
+{% set estoque_blueprints = ['entradas', 'estoque', 'patrimonio'] %}
+{% set compras_blueprints = ['pedidos_compra', 'licitacoes'] %}
 {% set cadastros_blueprints = ['secretarias', 'unidades', 'materiais', 'fornecedores', 'obras'] %}
 {% set sistema_blueprints = ['relatorios', 'auditoria', 'usuarios'] %}
+{% set movimentacoes_open = request.blueprint in movimentacoes_blueprints %}
+{% set estoque_open = request.blueprint in estoque_blueprints %}
+{% set compras_open = request.blueprint in compras_blueprints %}
 {% set cadastros_open = request.blueprint in cadastros_blueprints %}
 {% set sistema_open = request.blueprint in sistema_blueprints %}
 {% set is_cotacoes = request.blueprint == 'cotacoes' %}
@@ -75,10 +81,10 @@
         <li class="nav-item"><a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.blueprint=='dashboard' }}"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
 
         <li class="nav-group">
-          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('mov_consumiveis', 'mov_patrimonio') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-movimentacoes" aria-expanded="true">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if movimentacoes_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-movimentacoes" aria-expanded="{{ 'true' if movimentacoes_open else 'false' }}">
             <i class="bi bi-arrow-left-right"></i><span>Movimentações</span><i class="bi bi-chevron-down nav-group-caret"></i>
           </button>
-          <div class="collapse show" id="nav-group-movimentacoes">
+          <div class="collapse {{ 'show' if movimentacoes_open }}" id="nav-group-movimentacoes">
             <ul class="nav flex-column nav-group-items">
               <li class="nav-item"><a href="{{ url_for('mov_consumiveis.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_consumiveis' }}"><i class="bi bi-arrow-left-right"></i>Movimentações (Consumíveis)</a></li>
               <li class="nav-item"><a href="{{ url_for('mov_patrimonio.listar') }}" class="nav-link {{ 'active' if request.blueprint=='mov_patrimonio' }}"><i class="bi bi-arrow-repeat"></i>Movimentações (Patrimônio)</a></li>
@@ -87,10 +93,10 @@
         </li>
 
         <li class="nav-group">
-          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('entradas', 'estoque', 'patrimonio') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-estoque" aria-expanded="true">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if estoque_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-estoque" aria-expanded="{{ 'true' if estoque_open else 'false' }}">
             <i class="bi bi-box-seam"></i><span>Estoque</span><i class="bi bi-chevron-down nav-group-caret"></i>
           </button>
-          <div class="collapse show" id="nav-group-estoque">
+          <div class="collapse {{ 'show' if estoque_open }}" id="nav-group-estoque">
             <ul class="nav flex-column nav-group-items">
               <li class="nav-item"><a href="{{ url_for('entradas.listar') }}" class="nav-link {{ 'active' if request.blueprint=='entradas' }}"><i class="bi bi-box-arrow-in-down"></i>Entradas</a></li>
               <li class="nav-item"><a href="{{ url_for('estoque.listar') }}" class="nav-link {{ 'active' if request.blueprint=='estoque' }}"><i class="bi bi-clipboard-data"></i>Saldo em Estoque</a></li>
@@ -101,10 +107,10 @@
 
         {% if current_user and current_user.perfil in ('Administrador', 'Gestor') %}
         <li class="nav-group">
-          <button type="button" class="nav-group-toggle {{ 'has-active' if request.blueprint in ('pedidos_compra', 'licitacoes') }}" data-bs-toggle="collapse" data-bs-target="#nav-group-compras" aria-expanded="true">
+          <button type="button" class="nav-group-toggle {{ 'has-active' if compras_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-compras" aria-expanded="{{ 'true' if compras_open else 'false' }}">
             <i class="bi bi-cart4"></i><span>Compras</span><i class="bi bi-chevron-down nav-group-caret"></i>
           </button>
-          <div class="collapse show" id="nav-group-compras">
+          <div class="collapse {{ 'show' if compras_open }}" id="nav-group-compras">
             <ul class="nav flex-column nav-group-items">
               <li class="nav-item"><a href="{{ url_for('pedidos_compra.listar') }}" class="nav-link {{ 'active' if request.blueprint=='pedidos_compra' }}"><i class="bi bi-cart4"></i>Pedidos de Compra</a></li>
               <li class="nav-item"><a href="{{ url_for('licitacoes.listar') }}" class="nav-link {{ 'active' if request.blueprint=='licitacoes' }}"><i class="bi bi-file-earmark-text"></i>Licitações</a></li>
