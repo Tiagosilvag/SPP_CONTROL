@@ -17,6 +17,7 @@ from db import query_all, execute
 
 MENU_ITEMS = [
     {"chave": "dashboard", "label": "Dashboard", "grupo": None},
+    {"chave": "relatorios", "label": "Relatórios", "grupo": None},
     {"chave": "mov_consumiveis", "label": "Movimentações (Consumíveis)", "grupo": "Movimentações"},
     {"chave": "mov_patrimonio", "label": "Movimentações (Patrimônio)", "grupo": "Movimentações"},
     {"chave": "entradas", "label": "Entradas de Estoque", "grupo": "Estoque"},
@@ -29,15 +30,14 @@ MENU_ITEMS = [
     {"chave": "materiais", "label": "Materiais", "grupo": "Cadastros"},
     {"chave": "fornecedores", "label": "Fornecedores", "grupo": "Cadastros"},
     {"chave": "obras", "label": "Obras", "grupo": "Cadastros"},
-    {"chave": "relatorios", "label": "Relatórios", "grupo": "Sistema"},
     {"chave": "auditoria", "label": "Auditoria", "grupo": "Sistema"},
     {"chave": "cotacoes", "label": "Cotação x Projeto", "grupo": None},
 ]
 MENU_CHAVES = {item["chave"] for item in MENU_ITEMS}
 
-# Comportamento padrão de hoje: Operador não acessa Compras/Sistema,
-# todo o resto (Gestor e Administrador) vê tudo por padrão.
-_RESTRITO_OPERADOR = {"pedidos_compra", "licitacoes", "relatorios", "auditoria"}
+# Comportamento padrão de hoje: Operador não acessa Compras/Auditoria.
+# Relatórios é liberado para todo mundo por padrão.
+_RESTRITO_OPERADOR = {"pedidos_compra", "licitacoes", "auditoria"}
 
 
 def permissoes_padrao(perfil):

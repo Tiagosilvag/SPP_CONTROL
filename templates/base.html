@@ -38,7 +38,7 @@
   'materiais': {'section': 'Cadastros', 'label': 'Materiais'},
   'fornecedores': {'section': 'Cadastros', 'label': 'Fornecedores'},
   'obras': {'section': 'Cadastros', 'label': 'Obras'},
-  'relatorios': {'section': 'Sistema', 'label': 'Relatórios'},
+  'relatorios': {'section': none, 'label': 'Relatórios'},
   'auditoria': {'section': 'Sistema', 'label': 'Auditoria'},
   'usuarios': {'section': 'Sistema', 'label': 'Usuários'},
   'cotacoes': {'section': none, 'label': 'Cotações'},
@@ -48,7 +48,7 @@
 {% set estoque_blueprints = ['entradas', 'estoque', 'patrimonio'] %}
 {% set compras_blueprints = ['pedidos_compra', 'licitacoes'] %}
 {% set cadastros_blueprints = ['secretarias', 'unidades', 'materiais', 'fornecedores', 'obras'] %}
-{% set sistema_blueprints = ['relatorios', 'auditoria', 'usuarios'] %}
+{% set sistema_blueprints = ['auditoria', 'usuarios', 'permissoes'] %}
 {% set movimentacoes_open = request.blueprint in movimentacoes_blueprints %}
 {% set estoque_open = request.blueprint in estoque_blueprints %}
 {% set compras_open = request.blueprint in compras_blueprints %}
@@ -80,6 +80,10 @@
       <ul class="nav flex-column">
         {% if menu_permitido('dashboard') %}
         <li class="nav-item"><a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.blueprint=='dashboard' }}"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
+        {% endif %}
+
+        {% if menu_permitido('relatorios') %}
+        <li class="nav-item"><a href="{{ url_for('relatorios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='relatorios' }}"><i class="bi bi-file-earmark-bar-graph"></i>Relatórios</a></li>
         {% endif %}
 
         {% if menu_permitido('mov_consumiveis') or menu_permitido('mov_patrimonio') %}
@@ -167,16 +171,13 @@
         {% endif %}
 
         {% set mostra_usuarios = current_user and current_user.perfil == 'Administrador' %}
-        {% if menu_permitido('relatorios') or menu_permitido('auditoria') or mostra_usuarios %}
+        {% if menu_permitido('auditoria') or mostra_usuarios %}
         <li class="nav-group">
           <button type="button" class="nav-group-toggle {{ 'has-active' if sistema_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-sistema" aria-expanded="{{ 'true' if sistema_open else 'false' }}">
             <i class="bi bi-gear"></i><span>Sistema</span><i class="bi bi-chevron-down nav-group-caret"></i>
           </button>
           <div class="collapse {{ 'show' if sistema_open }}" id="nav-group-sistema">
             <ul class="nav flex-column nav-group-items">
-              {% if menu_permitido('relatorios') %}
-              <li class="nav-item"><a href="{{ url_for('relatorios.listar') }}" class="nav-link {{ 'active' if request.blueprint=='relatorios' }}"><i class="bi bi-file-earmark-bar-graph"></i>Relatórios</a></li>
-              {% endif %}
               {% if menu_permitido('auditoria') %}
               <li class="nav-item"><a href="{{ url_for('auditoria.listar') }}" class="nav-link {{ 'active' if request.blueprint=='auditoria' }}"><i class="bi bi-journal-text"></i>Auditoria</a></li>
               {% endif %}

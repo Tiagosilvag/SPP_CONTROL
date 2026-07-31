@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, abort
 from db import query_all
-from auth import roles_required
 from export_utils import exportar_excel, exportar_pdf
 from services_relatorios import REPORTS, FILTROS_APLICAVEIS
 
@@ -30,13 +29,11 @@ def _filtros_da_query():
 
 
 @bp.route("/")
-@roles_required("Administrador", "Gestor")
 def listar():
     return render_template("relatorios/list.html", reports=REPORTS)
 
 
 @bp.route("/<chave>")
-@roles_required("Administrador", "Gestor")
 def detalhe(chave):
     if chave not in REPORTS:
         abort(404)
@@ -60,7 +57,6 @@ def detalhe(chave):
 
 
 @bp.route("/<chave>/excel")
-@roles_required("Administrador", "Gestor")
 def excel(chave):
     if chave not in REPORTS:
         abort(404)
@@ -70,7 +66,6 @@ def excel(chave):
 
 
 @bp.route("/<chave>/pdf")
-@roles_required("Administrador", "Gestor")
 def pdf(chave):
     if chave not in REPORTS:
         abort(404)
