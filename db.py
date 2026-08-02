@@ -24,7 +24,7 @@ TABELAS_RASTREADAS = {
     "secretarias", "unidades", "materiais", "fornecedores", "obras",
     "patrimonios", "entradas_estoque", "movimentacoes_consumiveis",
     "movimentacoes_patrimonio", "pedidos_compra", "licitacoes", "cotacoes",
-    "recebimentos", "usuarios",
+    "recebimentos", "usuarios", "obra_materiais_planejados", "solicitacoes_compra",
 }
 
 

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{% set badge = {'Aberta': 'badge-soft-info', 'Parcialmente Atendida': 'badge-soft-warning', 'Atendida': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
+{{ page_header('bi-clipboard-plus', solicitacao.numero_solicitacao, subtitle='Solicitação de compra — ' ~ solicitacao.status) }}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-8">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-info-circle"></i> Dados da Solicitação</div>
+      <div class="row g-3">
+        <div class="col-6 col-md-4"><div class="small text-muted">Status</div><span class="badge {{ badge.get(solicitacao.status, 'badge-soft-neutral') }}">{{ solicitacao.status }}</span></div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Data</div>{{ solicitacao.data_solicitacao|brdate }}</div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Obra</div><a href="{{ url_for('obras.detalhe', id=solicitacao.obra_id) }}">{{ solicitacao.obra_codigo ~ ' - ' if solicitacao.obra_codigo }}{{ solicitacao.obra_descricao }}</a></div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Solicitante</div>{{ solicitacao.solicitante or '-' }}</div>
+        {% if solicitacao.observacoes %}<div class="col-12"><div class="small text-muted">Observações</div>{{ solicitacao.observacoes }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel h-100 d-flex flex-column gap-2">
+      <div class="panel-title"><i class="bi bi-gear"></i> Ações</div>
+      {% if solicitacao.status in ('Aberta', 'Parcialmente Atendida') %}
+        <a href="{{ url_for('pedidos_compra.novo', obra_id=solicitacao.obra_id, solicitacao_id=solicitacao.id) }}" class="btn btn-primary btn-sm"><i class="bi bi-cart4"></i> Criar Pedido de Compra</a>
+        <form method="post" action="{{ url_for('solicitacoes_compra.cancelar', id=solicitacao.id) }}" data-confirm="Confirma o cancelamento desta solicitação?"><button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-x-circle"></i> Cancelar</button></form>
+      {% endif %}
+      {% if solicitacao.status == 'Aberta' %}
+        <form method="post" action="{{ url_for('solicitacoes_compra.excluir', id=solicitacao.id) }}" data-confirm="Confirma a exclusão desta solicitação?"><button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash"></i> Excluir</button></form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="panel mb-3">
+  <div class="panel-title"><i class="bi bi-list-check"></i> Materiais Solicitados</div>
+  <div class="table-responsive">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Material</th><th>Solicitada</th><th>Atendida</th><th>Pendente</th></tr></thead>
+    <tbody>
+    {% for i in itens %}
+      <tr>
+        <td>{{ i.material_nome }}</td>
+        <td>{{ i.quantidade_solicitada|round(2) }} {{ i.unidade_medida }}</td>
+        <td>{{ i.quantidade_atendida|round(2) }} {{ i.unidade_medida }}</td>
+        <td><span class="badge {{ 'badge-soft-success' if i.quantidade_pendente <= 0 else 'badge-soft-warning' }}">{{ i.quantidade_pendente|round(2) }} {{ i.unidade_medida }}</span></td>
+      </tr>
+    {% else %}
+      {{ empty_row(4, 'Nenhum material nesta solicitação.') }}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title"><i class="bi bi-cart4"></i> Pedidos de Compra Gerados</div>
+  {% if pedidos %}
+  <div class="table-responsive">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Número</th><th>Data</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for p in pedidos %}
+      <tr>
+        <td><a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}">{{ p.numero_pedido }}</a></td>
+        <td>{{ p.data_pedido|brdate }}</td>
+        <td>{{ p.status }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state py-4">
+    <i class="bi bi-inbox"></i>
+    <div class="empty-state-title">Nenhum pedido gerado ainda</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

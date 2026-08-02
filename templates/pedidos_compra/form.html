@@ -10,10 +10,48 @@
 </div>
 {% endif %}
 
+{% if not pedido or not pedido.numero_pedido %}
+<div class="surface-card p-4 mb-3">
+  <div class="form-section-title">Obra e Solicitação de Compra</div>
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label">Obra</label>
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Nenhuma (pedido avulso)</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if obra_id_prefill and (obra_id_prefill|string)==(o.id|string) %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Solicitação a atender (opcional)</label>
+      <select class="form-select" name="solicitacao_id" onchange="this.form.submit()" {% if not obra_id_prefill %}disabled{% endif %}>
+        <option value="">Nenhuma / preencher itens manualmente</option>
+        {% for s in solicitacoes_obra %}
+        <option value="{{ s.id }}" {% if solicitacao_id_prefill and (solicitacao_id_prefill|string)==(s.id|string) %}selected{% endif %}>{{ s.numero_solicitacao }} ({{ s.data_solicitacao|brdate }})</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+  {% if not obra_id_prefill %}<div class="form-text mt-2">Escolha a obra pra ver as solicitações de compra em aberto dela.</div>{% endif %}
+</div>
+{% endif %}
+
 <form method="post" class="surface-card p-4">
   {% if duplicado %}<input type="hidden" name="confirmar_duplicidade" value="1">{% endif %}
+  <input type="hidden" name="obra_id" value="{{ obra_id_prefill or '' }}">
+  <input type="hidden" name="solicitacao_id" value="{{ solicitacao_id_prefill or '' }}">
 
   <div class="form-section-title">Dados do Pedido</div>
+  {% if obra_id_prefill %}
+  <div class="alert alert-info py-2">
+    <i class="bi bi-cone-striped"></i>
+    <div class="flex-grow-1">
+      {% for o in obras %}{% if (o.id|string)==(obra_id_prefill|string) %}Vinculado à obra <strong>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</strong>{% endif %}{% endfor %}
+      {% if solicitacao_id_prefill %}{% for s in solicitacoes_obra %}{% if (s.id|string)==(solicitacao_id_prefill|string) %} — atendendo a solicitação <strong>{{ s.numero_solicitacao }}</strong>{% endif %}{% endfor %}{% endif %}
+    </div>
+  </div>
+  {% endif %}
   <div class="row">
     <div class="col-md-3 mb-3">
       <label class="form-label">Data do Pedido</label>
@@ -76,6 +114,7 @@
       {% for item in itens %}
       <tr class="item-row">
         <td>
+          <input type="hidden" name="item_solicitacao_item_id[]" value="{{ item.solicitacao_item_id or '' }}">
           <select class="form-select form-select-sm" name="item_material_id[]" required>
             <option value="">Selecione...</option>
             {% for m in materiais %}
@@ -96,6 +135,7 @@
   <template id="item-row-template">
     <tr class="item-row">
       <td>
+        <input type="hidden" name="item_solicitacao_item_id[]" value="">
         <select class="form-select form-select-sm" name="item_material_id[]" required>
           <option value="">Selecione...</option>
           {% for m in materiais %}

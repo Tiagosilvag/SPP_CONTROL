@@ -321,3 +321,71 @@ ALTER TABLE recebimentos ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
 
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS atualizado_por INTEGER REFERENCES usuarios(id);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP;
+
+-- ============================================================
+-- Sistema de Gestão de Obras: a Obra vira a entidade central.
+-- ============================================================
+
+-- Código da obra e data real de conclusão (além da previsão já existente).
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS codigo TEXT;
+ALTER TABLE obras ADD COLUMN IF NOT EXISTS data_conclusao TEXT;
+
+-- Planejamento/orçamento de materiais da obra: o que se prevê usar,
+-- tanto consumível quanto patrimonial. Alimenta a tela de Materiais da
+-- Obra — quantidade_prevista é a única coisa cadastrada aqui; adquirida/
+-- entregue/pendente/situação são sempre calculadas (ver services_obras.py).
+CREATE TABLE IF NOT EXISTS obra_materiais_planejados (
+    id SERIAL PRIMARY KEY,
+    obra_id INTEGER NOT NULL REFERENCES obras(id) ON DELETE CASCADE,
+    material_id INTEGER NOT NULL REFERENCES materiais(id),
+    quantidade_prevista DOUBLE PRECISION NOT NULL,
+    observacoes TEXT,
+    criado_por INTEGER REFERENCES usuarios(id),
+    criado_em TIMESTAMP NOT NULL DEFAULT now(),
+    atualizado_por INTEGER REFERENCES usuarios(id),
+    atualizado_em TIMESTAMP,
+    UNIQUE (obra_id, material_id)
+);
+
+-- Solicitação de Compra: primeiro passo do fluxo da obra (Solicitação →
+-- Pedido → Baixa). Só para materiais Consumível — os Patrimoniais
+-- previstos na obra são supridos por transferência de bens já
+-- existentes (Movimentação Patrimonial), não por este fluxo de compra.
+CREATE TABLE IF NOT EXISTS solicitacoes_compra (
+    id SERIAL PRIMARY KEY,
+    numero_solicitacao TEXT UNIQUE NOT NULL,
+    obra_id INTEGER NOT NULL REFERENCES obras(id),
+    data_solicitacao TEXT NOT NULL,
+    solicitante TEXT,
+    status TEXT NOT NULL DEFAULT 'Aberta',  -- Aberta, Parcialmente Atendida, Atendida, Cancelada
+    observacoes TEXT,
+    criado_por INTEGER REFERENCES usuarios(id),
+    criado_em TIMESTAMP NOT NULL DEFAULT now(),
+    atualizado_por INTEGER REFERENCES usuarios(id),
+    atualizado_em TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS solicitacoes_compra_itens (
+    id SERIAL PRIMARY KEY,
+    solicitacao_id INTEGER NOT NULL REFERENCES solicitacoes_compra(id) ON DELETE CASCADE,
+    material_id INTEGER NOT NULL REFERENCES materiais(id),
+    quantidade_solicitada DOUBLE PRECISION NOT NULL,
+    quantidade_atendida DOUBLE PRECISION NOT NULL DEFAULT 0,
+    observacoes TEXT
+);
+
+-- Pedido de Compra passa a poder se vincular à obra e à solicitação que
+-- está atendendo (nullable para não quebrar pedidos antigos, que
+-- continuam existindo sem obra/solicitação associada).
+ALTER TABLE pedidos_compra ADD COLUMN IF NOT EXISTS obra_id INTEGER REFERENCES obras(id);
+ALTER TABLE pedidos_compra ADD COLUMN IF NOT EXISTS solicitacao_id INTEGER REFERENCES solicitacoes_compra(id);
+ALTER TABLE pedidos_compra_itens ADD COLUMN IF NOT EXISTS solicitacao_item_id INTEGER REFERENCES solicitacoes_compra_itens(id);
+
+-- (entradas_estoque já tinha obra_id opcional — passa a ser preenchido
+-- também nas entradas geradas automaticamente por um recebimento, com a
+-- obra do pedido correspondente.)
+
+-- Patrimônio passa a saber em qual obra está alocado no momento
+-- (atualizado pelas movimentações de Transferência entre Obras, Retorno
+-- e Baixa). NULL = não alocado a nenhuma obra específica.
+ALTER TABLE patrimonios ADD COLUMN IF NOT EXISTS obra_atual_id INTEGER REFERENCES obras(id);

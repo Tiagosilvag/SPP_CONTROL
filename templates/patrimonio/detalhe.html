@@ -32,7 +32,7 @@
     </div>
     <div class="col-md-4">
       <div class="stat-label">Status</div>
-      <div><span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger'}.get(p.status, 'badge-soft-neutral') }}">{{ p.status }}</span></div>
+      <div><span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger','Baixado':'badge-soft-neutral'}.get(p.status, 'badge-soft-neutral') }}">{{ p.status }}</span></div>
     </div>
     <div class="col-md-4">
       <div class="stat-label">Aquisição</div>
@@ -41,6 +41,12 @@
     <div class="col-md-4">
       <div class="stat-label">Cadastrado por</div>
       <div class="fw-semibold">{{ p.criado_por_nome or '-' }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-label">Obra Atual</div>
+      <div class="fw-semibold">
+        {% if p.obra_atual_descricao %}<a href="{{ url_for('obras.detalhe', id=p.obra_atual_id) }}">{{ p.obra_atual_codigo ~ ' - ' if p.obra_atual_codigo }}{{ p.obra_atual_descricao }}</a>{% else %}-{% endif %}
+      </div>
     </div>
   </div>
 </div>

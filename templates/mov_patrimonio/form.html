@@ -62,7 +62,7 @@
     <select class="form-select" name="obra_id">
       <option value="">Nenhuma</option>
       {% for o in obras %}
-      <option value="{{ o.id }}">{{ o.descricao }}</option>
+      <option value="{{ o.id }}" {% if obra_id_prefill and (obra_id_prefill|string)==(o.id|string) %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
       {% endfor %}
     </select>
   </div>
@@ -73,7 +73,7 @@
       <select class="form-select" name="obra_origem_id">
         <option value="">Selecione...</option>
         {% for o in obras %}
-        <option value="{{ o.id }}">{{ o.descricao }}</option>
+        <option value="{{ o.id }}" {% if obra_id_prefill and (obra_id_prefill|string)==(o.id|string) %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
         {% endfor %}
       </select>
     </div>
@@ -82,7 +82,7 @@
       <select class="form-select" name="obra_destino_id">
         <option value="">Selecione...</option>
         {% for o in obras %}
-        <option value="{{ o.id }}">{{ o.descricao }}</option>
+        <option value="{{ o.id }}">{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
         {% endfor %}
       </select>
     </div>

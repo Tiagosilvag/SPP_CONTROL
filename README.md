@@ -1,7 +1,8 @@
 # SPP - Control
 
-Sistema web de gestão de estoque, patrimônio, compras, licitações e
-auditoria para administração pública, desenvolvido em **Flask (Python) +
+Sistema de **Gestão de Obras** para administração pública — a Obra é a
+entidade central do sistema, e compras, patrimônio, materiais e
+movimentações giram em torno dela. Desenvolvido em **Flask (Python) +
 PostgreSQL + Bootstrap 5**.
 
 O sistema foi pensado em **módulos independentes** (blueprints do Flask),
@@ -10,28 +11,52 @@ que já existe.
 
 ---
 
-## 1. Módulos do sistema
+## 1. A Obra como centro do sistema
+
+O menu principal é **Obras** (no lugar onde antes ficava o Dashboard).
+Expandido, mostra todas as obras cadastradas agrupadas por status (Em
+Andamento / Concluída / Cancelada); cada obra tem sua própria página —
+um painel com dados gerais, os materiais planejados (consumíveis e
+patrimoniais) com a situação de cada um, e 4 ações rápidas já
+pré-vinculadas àquela obra:
+
+1. **Nova Solicitação de Compra**
+2. **Novo Pedido de Compra** (pode atender uma solicitação existente)
+3. **Baixa de Pedido** (lista os pedidos da obra para dar entrada)
+4. **Movimentação Patrimonial** (transferência entre obras, retorno, manutenção, baixa)
+
+Fluxo de compra da obra: **Solicitação → Pedido → Baixa → Material disponível na obra.**
+Não existe entrada manual de estoque fora desse fluxo — a Baixa do Pedido
+é quem atualiza o estoque e a situação dos materiais automaticamente.
+
+Antes de tudo isso, cada obra passa por um **Planejamento de Materiais**
+(`/obras/<id>/planejamento`): a lista do que será necessário, consumível
+e patrimonial, com a quantidade prevista. Os consumíveis planejados
+alimentam as Solicitações de Compra; os patrimoniais planejados são
+supridos por transferência de bens já cadastrados entre obras (não por
+compra) — o status **OK** de um material nunca é marcado manualmente,
+só quando a quantidade realmente entregue/alocada atinge a prevista.
+
+---
+
+## 2. Módulos do sistema
 
 | Módulo | O que faz |
 |---|---|
-| **Dashboard** | Indicadores gerais: estoque crítico, compras pendentes, pedidos atrasados, patrimônios emprestados/em manutenção, e gráficos por secretaria/fornecedor/obra |
-| **Secretarias** | Cadastro das secretarias municipais |
-| **Unidades** | Cadastro das unidades/locais de cada secretaria |
-| **Materiais** | Cadastro de materiais consumíveis e patrimoniais, com estoque mínimo |
-| **Fornecedores** | Cadastro de fornecedores |
-| **Obras** | Cadastro de obras/serviços que consomem materiais |
-| **Patrimônio** | Cadastro individual de bens (nº de patrimônio, estado, status, localização) |
-| **Entradas de Estoque** | Registro de recebimento de materiais (compra/doação), com vínculo opcional a um pedido de compra |
+| **Obras** | Entidade central: painel por obra, planejamento de materiais, código, datas de início/previsão/conclusão, status (Em Andamento/Concluída/Cancelada) |
+| **Solicitações de Compra** | Primeiro passo do fluxo da obra — o que precisa ser comprado (só materiais consumíveis) |
+| **Pedidos de Compra** | Pode atender uma Solicitação (itens pré-preenchidos) ou ser avulso; cabeçalho + itens, saldo pendente automático, alerta de duplicidade |
+| **Recebimento Parcial (Baixa de Pedido)** | Múltiplos recebimentos por pedido; dá baixa no pedido **e** na solicitação de origem, gera a Entrada de Estoque e atualiza a situação do material na obra |
+| **Secretarias / Unidades / Materiais / Fornecedores** | Cadastros de apoio |
+| **Patrimônio** | Cadastro individual de bens; sabe em qual obra está alocado no momento (`obra_atual_id`), atualizado pelas movimentações |
+| **Entradas de Estoque** | Geradas automaticamente pela Baixa de Pedido (ou lançamento manual avulso) |
 | **Movimentações (Consumíveis)** | Consumo em obra, transferência (entre unidades e entre obras), retorno, devolução e empréstimo (secundário) |
-| **Movimentações (Patrimônio)** | Transferência (entre unidades e entre obras), devolução, empréstimo, retorno e manutenção |
+| **Movimentações (Patrimônio)** | Transferência (entre unidades e entre obras), devolução, empréstimo, retorno, manutenção e **baixa** (bem inservível/descartado) |
 | **Saldo em Estoque** | Relatório calculado automaticamente a partir do histórico de Entradas e Movimentações |
-| **Pedidos de Compra** | Cabeçalho + itens, cálculo automático de saldo pendente, alerta de duplicidade, planejamento de entrega e atrasos |
-| **Recebimento Parcial** | Múltiplos recebimentos por pedido, baixa automática do saldo, geração automática da Entrada de Estoque correspondente, encerramento automático do pedido |
 | **Licitações** | Cadastro de processos licitatórios (categoria, modalidade, objeto, processo, valores estimado/homologado) |
 | **Cotação x Projeto** | Comparação de preços entre vários fornecedores por cotação, com cálculo de economia em relação ao valor estimado |
-| **Relatórios** | Exportação em PDF e Excel, com filtros, para 13 áreas do sistema (estoque, entradas, saídas, patrimônio, pedidos, compras, fornecedores, licitações, auditoria, movimentações, obras, secretarias, unidades) |
-| **Usuários** | Gestão de contas e perfis (Administrador/Gestor/Operador) — restrito a Administradores |
-| **Auditoria** | Histórico de todas as operações de escrita (quem, quando, IP, tabela, valor anterior/novo) |
+| **Auditoria** *(menu)* | Reúne Dashboard (indicadores/gráficos gerenciais), Relatórios (exportação PDF/Excel de 13 áreas) e Log Sistêmico (histórico de toda operação de escrita: quem, quando, IP, valor anterior/novo) |
+| **Usuários / Permissões** | Gestão de contas, perfis (Administrador/Gestor/Operador) e permissões de menu por usuário — restrito a Administradores |
 
 ### Regras de negócio
 
@@ -52,8 +77,10 @@ que já existe.
   material em comum, e pede confirmação antes de salvar mesmo assim.
 - **Perfis de acesso**: `Administrador` (tudo, inclusive usuários),
   `Gestor` (tudo, exceto usuários) e `Operador` (módulos operacionais do
-  dia a dia — estoque, patrimônio, movimentações — mas não Compras,
-  Licitações, Relatórios ou Auditoria).
+  dia a dia — Obras, estoque, patrimônio, movimentações, Dashboard e
+  Relatórios — mas não Solicitações/Pedidos de Compra, Licitações ou Log
+  Sistêmico, por padrão). Cada usuário pode ter esse padrão substituído
+  por uma permissão customizada em **Auditoria → Usuários → Permissões**.
 - **Auditoria**: toda operação de escrita feita pela aplicação é registrada
   automaticamente (usuário, data/hora, IP, tabela, valor anterior e novo),
   na mesma transação da alteração.
@@ -67,7 +94,7 @@ que já existe.
 
 ---
 
-## 2. Requisitos
+## 3. Requisitos
 
 - Python 3.10 ou superior
 - Um banco **PostgreSQL** acessível (local ou remoto, ex: instância criada no
@@ -76,7 +103,7 @@ que já existe.
 
 ---
 
-## 3. Instalação e primeira execução
+## 4. Instalação e primeira execução
 
 ```bash
 # 1. Entre na pasta do projeto
@@ -110,7 +137,7 @@ automaticamente para **`/auth/setup`**, onde você cria a primeira conta de
 
 ---
 
-## 4. Estrutura do projeto
+## 5. Estrutura do projeto
 
 ```
 spp_control/
@@ -120,9 +147,12 @@ spp_control/
 ├── auth.py                     # Login, hash de senha, decorators de perfil
 ├── schema.sql                   # Definição/evolução das tabelas do banco (idempotente)
 ├── services.py                  # Regras de negócio de estoque e patrimônio
+├── services_obras.py             # Painel da obra: materiais planejados x adquiridos x entregues
+├── services_solicitacoes.py      # Regras de Solicitação de Compra
 ├── services_compras.py           # Regras de Pedidos de Compra e Recebimento Parcial
 ├── services_cotacoes.py          # Regras de Cotação x Fornecedor
 ├── services_relatorios.py        # Consultas usadas pelo módulo de Relatórios
+├── permissoes.py                 # Registro de menus e permissões por usuário
 ├── export_utils.py               # Exportação genérica para Excel (openpyxl) e PDF (reportlab)
 ├── seed_data.py                   # Importa a planilha original para um SQLite local (uso histórico)
 ├── migrate_sqlite_to_postgres.py  # Migra dados do SQLite antigo para o PostgreSQL
@@ -135,7 +165,7 @@ spp_control/
 
 ---
 
-## 5. Como adicionar um novo módulo no futuro
+## 6. Como adicionar um novo módulo no futuro
 
 1. Crie/altere a tabela necessária em `schema.sql` (use `CREATE TABLE IF NOT
    EXISTS` e `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` para manter idempotente).
@@ -148,7 +178,7 @@ spp_control/
 
 ---
 
-## 6. Observações importantes
+## 7. Observações importantes
 
 - **Backup**: o banco de dados é PostgreSQL. Use `pg_dump` (ou a aba
   **Backups** do serviço no Coolify) para gerar backups regulares.

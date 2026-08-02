@@ -70,10 +70,10 @@
 
   <div class="row g-4">
     <div class="col-md-6">
-      <a href="{{ url_for('dashboard.index') }}" class="surface-card module-card">
-        <span class="module-card-icon badge-soft-info"><i class="bi bi-shield-lock-fill"></i></span>
-        <h2 class="h5 fw-bold mb-2">Materiais e Patrimônio</h2>
-        <p class="text-muted mb-0">Controle de estoque, entradas, movimentações e bens patrimoniais das secretarias.</p>
+      <a href="{{ url_for('obras.listar') }}" class="surface-card module-card">
+        <span class="module-card-icon badge-soft-info"><i class="bi bi-cone-striped"></i></span>
+        <h2 class="h5 fw-bold mb-2">Gestão de Obras</h2>
+        <p class="text-muted mb-0">Compras, estoque, patrimônio e movimentações organizados por obra.</p>
       </a>
     </div>
     {% if menu_permitido('cotacoes') %}

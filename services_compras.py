@@ -4,6 +4,7 @@ Parcial, controle de duplicidade e planejamento (atrasos/próximas entregas).
 """
 from datetime import date, datetime
 from db import query_all, query_one, execute
+from services_solicitacoes import dar_baixa_em_solicitacao
 
 STATUS_PEDIDO = ["Em Elaboração", "Enviado", "Parcialmente Recebido", "Recebido", "Cancelado"]
 
@@ -109,8 +110,8 @@ def registrar_recebimento(pedido_id, data_recebimento, nota_fiscal, responsavel,
         )
         execute(
             """INSERT INTO entradas_estoque (data_entrada, material_id, secretaria_proprietaria_id,
-               unidade_destino_id, fornecedor_id, quantidade, nota_fiscal, pedido_item_id, observacoes)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               unidade_destino_id, fornecedor_id, quantidade, nota_fiscal, pedido_item_id, obra_id, observacoes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 data_recebimento,
                 pedido_item["material_id"],
@@ -120,9 +121,11 @@ def registrar_recebimento(pedido_id, data_recebimento, nota_fiscal, responsavel,
                 quantidade,
                 nota_fiscal,
                 pedido_item["id"],
+                pedido["obra_id"],
                 f"Recebimento do pedido {pedido['numero_pedido']}",
             ),
         )
+        dar_baixa_em_solicitacao(pedido_item, quantidade)
 
     atualizar_status_pedido(pedido_id)
     return recebimento_id

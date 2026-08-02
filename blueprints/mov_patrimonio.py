@@ -74,6 +74,7 @@ def nova():
     unidades = query_all("SELECT * FROM unidades ORDER BY nome")
     obras = query_all("SELECT * FROM obras ORDER BY descricao")
     tipo_prefill = request.args.get("tipo", "")
+    obra_id_prefill = request.args.get("obra_id", type=int)
 
     if request.method == "POST":
         tipo = request.form["tipo_movimentacao"]
@@ -125,6 +126,7 @@ def nova():
         obras=obras,
         tipos=TIPOS_MOV_PATRIMONIO,
         tipo_prefill=tipo_prefill,
+        obra_id_prefill=obra_id_prefill,
     )
 
 

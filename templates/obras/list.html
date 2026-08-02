@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import page_header, row_actions, empty_row %}
+{% from "_macros.html" import page_header, empty_row %}
 {% block content %}
 {{ page_header('bi-cone-striped', 'Obras', action_url=url_for('obras.nova'), action_label='Nova Obra') }}
 
@@ -8,8 +8,9 @@
     <div class="col-md-3">
       <select class="form-select" name="status" onchange="this.form.submit()">
         <option value="">Todos os status</option>
-        <option value="Em Andamento" {% if status=='Em Andamento' %}selected{% endif %}>Em Andamento</option>
-        <option value="Concluída" {% if status=='Concluída' %}selected{% endif %}>Concluída</option>
+        {% for st in status_list %}
+        <option value="{{ st }}" {% if status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="col-md-3">
@@ -35,20 +36,31 @@
 <div class="table-responsive">
 <table class="table table-hover align-middle mb-0">
   <thead>
-    <tr><th>Descrição</th><th>Secretaria</th><th>Unidade</th><th>Início</th><th>Previsão Término</th><th>Status</th><th>Fiscal</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
+    <tr><th>Código</th><th>Descrição</th><th>Secretaria</th><th>Unidade</th><th>Início</th><th>Previsão</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
   </thead>
   <tbody>
     {% for o in obras %}
     <tr>
-      <td>{{ o.descricao }}</td>
+      <td>{{ o.codigo or '-' }}</td>
+      <td><a href="{{ url_for('obras.detalhe', id=o.id) }}" class="fw-semibold">{{ o.descricao }}</a></td>
       <td>{{ o.secretaria_sigla or '-' }}</td>
       <td>{{ o.unidade_nome or '-' }}</td>
       <td>{{ o.data_inicio|brdate }}</td>
       <td>{{ o.previsao_termino|brdate }}</td>
-      <td><span class="badge {{ 'badge-soft-success' if o.status=='Concluída' else 'badge-soft-warning' }}">{{ o.status }}</span></td>
-      <td>{{ o.fiscal_responsavel or '-' }}</td>
+      <td>
+        {% set badge = {'Em Andamento': 'badge-soft-warning', 'Concluída': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
+        <span class="badge {{ badge.get(o.status, 'badge-soft-neutral') }}">{{ o.status }}</span>
+      </td>
       <td class="text-muted small">{{ o.criado_por_nome or '-' }}</td>
-      <td>{{ row_actions(url_for('obras.editar', id=o.id), url_for('obras.excluir', id=o.id), 'Confirma a exclusão desta obra?') }}</td>
+      <td class="text-end">
+        <div class="row-actions">
+          <a href="{{ url_for('obras.detalhe', id=o.id) }}" class="btn btn-sm btn-outline-primary" title="Abrir painel da obra"><i class="bi bi-eye"></i></a>
+          <a href="{{ url_for('obras.editar', id=o.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
+          <form action="{{ url_for('obras.excluir', id=o.id) }}" method="post" data-confirm="Confirma a exclusão desta obra?">
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </td>
     </tr>
     {% else %}
     {{ empty_row(9, 'Nenhuma obra cadastrada.', 'bi-cone-striped') }}

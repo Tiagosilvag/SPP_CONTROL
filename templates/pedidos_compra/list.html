@@ -25,6 +25,14 @@
 <div class="filter-bar">
   <form class="row g-2" method="get">
     <div class="col-md-2">
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Obra</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if filtros.obra_id==o.id %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
       <select class="form-select" name="secretaria_id" onchange="this.form.submit()">
         <option value="">Secretaria</option>
         {% for s in secretarias %}
@@ -76,13 +84,14 @@
 <table class="table table-hover align-middle mb-0">
   <thead>
     <tr>
-      <th>Número</th><th>Data</th><th>Secretaria/Unidade</th><th>Fornecedor</th><th>Responsável</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th>
+      <th>Número</th><th>Obra</th><th>Data</th><th>Secretaria/Unidade</th><th>Fornecedor</th><th>Responsável</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th>
     </tr>
   </thead>
   <tbody>
     {% for p in pedidos %}
     <tr>
       <td><a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}">{{ p.numero_pedido }}</a></td>
+      <td>{% if p.obra_descricao %}{{ p.obra_codigo ~ ' - ' if p.obra_codigo }}{{ p.obra_descricao }}{% else %}-{% endif %}</td>
       <td>{{ p.data_pedido|brdate }}</td>
       <td>{{ p.secretaria_sigla or '-' }} / {{ p.unidade_nome or '-' }}</td>
       <td>{{ p.fornecedor_nome or '-' }}</td>
@@ -97,7 +106,7 @@
       </td>
     </tr>
     {% else %}
-    {{ empty_row(8, 'Nenhum pedido de compra cadastrado.', 'bi-cart4') }}
+    {{ empty_row(9, 'Nenhum pedido de compra cadastrado.', 'bi-cart4') }}
     {% endfor %}
   </tbody>
 </table>

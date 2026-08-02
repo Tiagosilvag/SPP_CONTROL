@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, empty_row %}
+{% block content %}
+{{ page_header('bi-clipboard-plus', 'Solicitações de Compra', subtitle='Primeiro passo do fluxo da obra: o que precisa ser comprado.', action_url=url_for('solicitacoes_compra.nova'), action_label='Nova Solicitação') }}
+
+<div class="filter-bar">
+  <form class="row g-2" method="get">
+    <div class="col-md-4">
+      <select class="form-select" name="obra_id" onchange="this.form.submit()">
+        <option value="">Todas as obras</option>
+        {% for o in obras %}
+        <option value="{{ o.id }}" {% if filtros.obra_id==o.id %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="status" onchange="this.form.submit()">
+        <option value="">Status</option>
+        {% for st in status_list %}
+        <option value="{{ st }}" {% if filtros.status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-card">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead>
+    <tr><th>Número</th><th>Data</th><th>Obra</th><th>Solicitante</th><th>Status</th><th class="text-end">Ações</th></tr>
+  </thead>
+  <tbody>
+    {% for s in solicitacoes %}
+    <tr>
+      <td><a href="{{ url_for('solicitacoes_compra.detalhe', id=s.id) }}">{{ s.numero_solicitacao }}</a></td>
+      <td>{{ s.data_solicitacao|brdate }}</td>
+      <td>{{ s.obra_codigo ~ ' - ' if s.obra_codigo }}{{ s.obra_descricao }}</td>
+      <td>{{ s.solicitante or '-' }}</td>
+      <td>
+        {% set badge = {'Aberta': 'badge-soft-info', 'Parcialmente Atendida': 'badge-soft-warning', 'Atendida': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
+        <span class="badge {{ badge.get(s.status, 'badge-soft-neutral') }}">{{ s.status }}</span>
+      </td>
+      <td class="text-end">
+        <a href="{{ url_for('solicitacoes_compra.detalhe', id=s.id) }}" class="btn btn-sm btn-outline-primary" title="Ver detalhes"><i class="bi bi-eye"></i></a>
+      </td>
+    </tr>
+    {% else %}
+    {{ empty_row(6, 'Nenhuma solicitação de compra cadastrada.', 'bi-clipboard-plus') }}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

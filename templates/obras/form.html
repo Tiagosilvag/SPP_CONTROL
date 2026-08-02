@@ -4,9 +4,15 @@
 {{ page_header('bi-cone-striped', ('Editar Obra' if obra else 'Nova Obra')) }}
 
 <form method="post" class="surface-card form-card p-4">
-  <div class="mb-3">
-    <label class="form-label">Descrição</label>
-    <input type="text" class="form-control" name="descricao" required value="{{ obra.descricao if obra else '' }}">
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <label class="form-label">Código</label>
+      <input type="text" class="form-control" name="codigo" placeholder="Ex: OBR-2026-001" value="{{ obra.codigo if obra and obra.codigo else '' }}">
+    </div>
+    <div class="col-md-9 mb-3">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-control" name="descricao" required value="{{ obra.descricao if obra else '' }}">
+    </div>
   </div>
   <div class="row">
     <div class="col-md-6 mb-3">
@@ -14,7 +20,7 @@
       <select class="form-select" name="secretaria_solicitante_id">
         <option value="">Selecione...</option>
         {% for s in secretarias %}
-        <option value="{{ s.id }}" {% if obra and obra.secretaria_solicitante_id==s.id %}selected{% endif %}>{{ s.sigla }} - {{ s.nome }}</option>
+        <option value="{{ s.id }}" {% if obra and (obra.secretaria_solicitante_id|string)==(s.id|string) %}selected{% endif %}>{{ s.sigla }} - {{ s.nome }}</option>
         {% endfor %}
       </select>
     </div>
@@ -23,31 +29,36 @@
       <select class="form-select" name="unidade_local_id">
         <option value="">Selecione...</option>
         {% for u in unidades %}
-        <option value="{{ u.id }}" {% if obra and obra.unidade_local_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        <option value="{{ u.id }}" {% if obra and (obra.unidade_local_id|string)==(u.id|string) %}selected{% endif %}>{{ u.nome }}</option>
         {% endfor %}
       </select>
     </div>
   </div>
   <div class="row">
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
       <label class="form-label">Data de Início</label>
       <input type="date" class="form-control" name="data_inicio" value="{{ obra.data_inicio if obra and obra.data_inicio else '' }}">
     </div>
-    <div class="col-md-6 mb-3">
-      <label class="form-label">Previsão de Término</label>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Previsão de Conclusão</label>
       <input type="date" class="form-control" name="previsao_termino" value="{{ obra.previsao_termino if obra and obra.previsao_termino else '' }}">
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label">Data de Conclusão</label>
+      <input type="date" class="form-control" name="data_conclusao" value="{{ obra.data_conclusao if obra and obra.data_conclusao else '' }}">
     </div>
   </div>
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">Status</label>
       <select class="form-select" name="status">
-        <option value="Em Andamento" {% if obra and obra.status=='Em Andamento' %}selected{% endif %}>Em Andamento</option>
-        <option value="Concluída" {% if obra and obra.status=='Concluída' %}selected{% endif %}>Concluída</option>
+        {% for st in status_list %}
+        <option value="{{ st }}" {% if obra and obra.status==st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="col-md-6 mb-3">
-      <label class="form-label">Fiscal Responsável</label>
+      <label class="form-label">Responsável</label>
       <input type="text" class="form-control" name="fiscal_responsavel" value="{{ obra.fiscal_responsavel if obra else '' }}">
     </div>
   </div>
@@ -55,6 +66,6 @@
     <label class="form-label">Observações</label>
     <textarea class="form-control" name="observacoes" rows="3">{{ obra.observacoes if obra else '' }}</textarea>
   </div>
-  {{ form_actions(url_for('obras.listar')) }}
+  {{ form_actions(url_for('obras.detalhe', id=obra.id) if obra else url_for('obras.listar')) }}
 </form>
 {% endblock %}

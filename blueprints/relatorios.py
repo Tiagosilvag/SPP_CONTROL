@@ -9,9 +9,9 @@ STATUS_OPTIONS = {
     "secretarias": ["Ativa", "Inativa"],
     "unidades": ["Ativa", "Inativa"],
     "fornecedores": ["Ativo", "Inativo"],
-    "patrimonio": ["Disponível", "Em Uso", "Emprestado", "Manutenção"],
+    "patrimonio": ["Disponível", "Em Uso", "Emprestado", "Manutenção", "Baixado"],
     "pedidos": ["Em Elaboração", "Enviado", "Parcialmente Recebido", "Recebido", "Cancelado"],
-    "obras": ["Em Andamento", "Concluída"],
+    "obras": ["Em Andamento", "Concluída", "Cancelada"],
 }
 
 

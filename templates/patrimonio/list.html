@@ -53,7 +53,7 @@
       <td>{{ p.unidade_nome or '-' }}</td>
       <td>{{ p.estado_conservacao }}</td>
       <td>
-        <span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger'}[p.status] }}">{{ p.status }}</span>
+        <span class="badge {{ {'Disponível':'badge-soft-success','Em Uso':'badge-soft-info','Emprestado':'badge-soft-warning','Manutenção':'badge-soft-danger','Baixado':'badge-soft-neutral'}.get(p.status, 'badge-soft-neutral') }}">{{ p.status }}</span>
       </td>
       <td class="text-muted small">{{ p.criado_por_nome or '-' }}</td>
       <td>{{ row_actions(url_for('patrimonio.editar', id=p.id), url_for('patrimonio.excluir', id=p.id), 'Confirma a exclusão do bem ' ~ p.num_patrimonio ~ '?') }}</td>

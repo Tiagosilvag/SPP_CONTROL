@@ -16,28 +16,29 @@ criar outros administradores).
 from db import query_all, execute
 
 MENU_ITEMS = [
-    {"chave": "dashboard", "label": "Dashboard", "grupo": None},
-    {"chave": "relatorios", "label": "Relatórios", "grupo": None},
+    {"chave": "obras", "label": "Obras", "grupo": None},
+    {"chave": "relatorios", "label": "Relatórios", "grupo": "Auditoria"},
     {"chave": "mov_consumiveis", "label": "Movimentações (Consumíveis)", "grupo": "Movimentações"},
     {"chave": "mov_patrimonio", "label": "Movimentações (Patrimônio)", "grupo": "Movimentações"},
     {"chave": "entradas", "label": "Entradas de Estoque", "grupo": "Estoque"},
     {"chave": "estoque", "label": "Saldo em Estoque", "grupo": "Estoque"},
     {"chave": "patrimonio", "label": "Bens Patrimoniais", "grupo": "Estoque"},
+    {"chave": "solicitacoes_compra", "label": "Solicitações de Compra", "grupo": "Compras"},
     {"chave": "pedidos_compra", "label": "Pedidos de Compra", "grupo": "Compras"},
     {"chave": "licitacoes", "label": "Licitações", "grupo": "Compras"},
     {"chave": "secretarias", "label": "Secretarias", "grupo": "Cadastros"},
     {"chave": "unidades", "label": "Unidades", "grupo": "Cadastros"},
     {"chave": "materiais", "label": "Materiais", "grupo": "Cadastros"},
     {"chave": "fornecedores", "label": "Fornecedores", "grupo": "Cadastros"},
-    {"chave": "obras", "label": "Obras", "grupo": "Cadastros"},
-    {"chave": "auditoria", "label": "Auditoria", "grupo": "Sistema"},
+    {"chave": "dashboard", "label": "Dashboard", "grupo": "Auditoria"},
+    {"chave": "auditoria", "label": "Log Sistêmico", "grupo": "Auditoria"},
     {"chave": "cotacoes", "label": "Cotação x Projeto", "grupo": None},
 ]
 MENU_CHAVES = {item["chave"] for item in MENU_ITEMS}
 
 # Comportamento padrão de hoje: Operador não acessa Compras/Auditoria.
-# Relatórios é liberado para todo mundo por padrão.
-_RESTRITO_OPERADOR = {"pedidos_compra", "licitacoes", "auditoria"}
+# Relatórios e Dashboard são liberados para todo mundo por padrão.
+_RESTRITO_OPERADOR = {"solicitacoes_compra", "pedidos_compra", "licitacoes", "auditoria"}
 
 
 def permissoes_padrao(perfil):

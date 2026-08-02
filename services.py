@@ -10,13 +10,13 @@ from datetime import date
 from db import query_all, query_one, execute
 
 TIPOS_MOV_CONSUMIVEL = ["Consumo em Obra", "Transferência", "Transferência entre Obras", "Retorno", "Devolução", "Empréstimo"]
-TIPOS_MOV_PATRIMONIO = ["Transferência", "Transferência entre Obras", "Devolução", "Empréstimo", "Retorno", "Manutenção"]
+TIPOS_MOV_PATRIMONIO = ["Transferência", "Transferência entre Obras", "Devolução", "Empréstimo", "Retorno", "Manutenção", "Baixa"]
 
 # Botões de ação rápida nas telas de movimentação (item 10). Empréstimo de
 # consumíveis é incomum na prática — fica disponível no formulário, mas
 # fora dos atalhos, conforme pedido.
 QUICK_TIPOS_CONSUMIVEL = ["Transferência", "Transferência entre Obras", "Retorno", "Devolução"]
-QUICK_TIPOS_PATRIMONIO = ["Transferência", "Devolução", "Empréstimo", "Retorno", "Manutenção"]
+QUICK_TIPOS_PATRIMONIO = ["Transferência entre Obras", "Retorno", "Manutenção", "Baixa", "Devolução", "Empréstimo"]
 
 
 def calcular_estoque_consumiveis():
@@ -130,19 +130,35 @@ def aplicar_efeito_movimentacao_patrimonio(mov_id):
                 (mov_id,),
             )
 
-    elif tipo in ("Transferência", "Transferência entre Obras"):
+    elif tipo == "Transferência":
         execute(
             "UPDATE patrimonios SET status='Em Uso', unidade_atual_id=COALESCE(?, unidade_atual_id) WHERE id=?",
             (mov["unidade_destino_id"], patrimonio_id),
         )
 
+    elif tipo == "Transferência entre Obras":
+        execute(
+            """UPDATE patrimonios SET status='Em Uso',
+               unidade_atual_id=COALESCE(?, unidade_atual_id), obra_atual_id=COALESCE(?, obra_atual_id)
+               WHERE id=?""",
+            (mov["unidade_destino_id"], mov["obra_destino_id"], patrimonio_id),
+        )
+
     elif tipo == "Manutenção":
         execute("UPDATE patrimonios SET status='Manutenção' WHERE id=?", (patrimonio_id,))
+
+    elif tipo == "Baixa":
+        execute(
+            "UPDATE patrimonios SET status='Baixado', obra_atual_id=NULL WHERE id=?",
+            (patrimonio_id,),
+        )
 
     elif tipo == "Retorno":
         destino = mov["unidade_destino_id"] or mov["unidade_origem_id"]
         execute(
-            "UPDATE patrimonios SET status='Disponível', unidade_atual_id=COALESCE(?, unidade_atual_id) WHERE id=?",
+            """UPDATE patrimonios SET status='Disponível',
+               unidade_atual_id=COALESCE(?, unidade_atual_id), obra_atual_id=NULL
+               WHERE id=?""",
             (destino, patrimonio_id),
         )
 

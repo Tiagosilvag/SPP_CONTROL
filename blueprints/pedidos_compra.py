@@ -10,6 +10,7 @@ from services_compras import (
     pedidos_atrasados,
     pedidos_proximos_entrega,
 )
+from services_solicitacoes import solicitacoes_abertas_obra, itens_solicitacao
 
 bp = Blueprint("pedidos_compra", __name__)
 
@@ -19,8 +20,13 @@ def _parse_itens_form():
     quantidades = request.form.getlist("item_quantidade[]")
     valores = request.form.getlist("item_valor_unitario[]")
     observacoes = request.form.getlist("item_observacoes[]")
+    solicitacao_item_ids = request.form.getlist("item_solicitacao_item_id[]")
+    if len(solicitacao_item_ids) != len(materiais):
+        solicitacao_item_ids = [""] * len(materiais)
     itens = []
-    for material_id, quantidade, valor, obs in zip(materiais, quantidades, valores, observacoes):
+    for material_id, quantidade, valor, obs, sol_item_id in zip(
+        materiais, quantidades, valores, observacoes, solicitacao_item_ids
+    ):
         if not material_id or not quantidade:
             continue
         itens.append(
@@ -29,12 +35,14 @@ def _parse_itens_form():
                 "quantidade_solicitada": float(quantidade),
                 "valor_unitario": float(valor or 0),
                 "observacoes": obs.strip(),
+                "solicitacao_item_id": int(sol_item_id) if sol_item_id else None,
             }
         )
     return itens
 
 
-def _form_context(pedido=None, itens=None):
+def _form_context(pedido=None, itens=None, obra_id_prefill=None, solicitacao_id_prefill=None):
+    obra_id_prefill = obra_id_prefill or (pedido.get("obra_id") if pedido else None)
     return {
         "pedido": pedido,
         "itens": itens or [],
@@ -42,6 +50,10 @@ def _form_context(pedido=None, itens=None):
         "unidades": query_all("SELECT * FROM unidades WHERE ativa=1 ORDER BY nome"),
         "fornecedores": query_all("SELECT * FROM fornecedores WHERE ativo=1 ORDER BY nome"),
         "materiais": query_all("SELECT * FROM materiais WHERE ativo=1 ORDER BY nome"),
+        "obras": query_all("SELECT * FROM obras ORDER BY descricao"),
+        "obra_id_prefill": obra_id_prefill,
+        "solicitacao_id_prefill": solicitacao_id_prefill,
+        "solicitacoes_obra": solicitacoes_abertas_obra(obra_id_prefill) if obra_id_prefill else [],
     }
 
 
@@ -51,20 +63,25 @@ def listar():
     secretaria_id = request.args.get("secretaria_id", type=int)
     unidade_id = request.args.get("unidade_id", type=int)
     fornecedor_id = request.args.get("fornecedor_id", type=int)
+    obra_id = request.args.get("obra_id", type=int)
     status = request.args.get("status", "")
     responsavel = request.args.get("responsavel", "").strip()
     data_inicio = request.args.get("data_inicio", "")
     data_fim = request.args.get("data_fim", "")
 
     sql = """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome,
-                    uc.nome AS criado_por_nome
+                    uc.nome AS criado_por_nome, o.descricao AS obra_descricao, o.codigo AS obra_codigo
              FROM pedidos_compra p
              LEFT JOIN secretarias s ON s.id = p.secretaria_id
              LEFT JOIN unidades u ON u.id = p.unidade_id
              LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
              LEFT JOIN usuarios uc ON uc.id = p.criado_por
+             LEFT JOIN obras o ON o.id = p.obra_id
              WHERE 1=1"""
     args = []
+    if obra_id:
+        sql += " AND p.obra_id=?"
+        args.append(obra_id)
     if secretaria_id:
         sql += " AND p.secretaria_id=?"
         args.append(secretaria_id)
@@ -97,10 +114,11 @@ def listar():
         secretarias=query_all("SELECT * FROM secretarias ORDER BY nome"),
         unidades=query_all("SELECT * FROM unidades ORDER BY nome"),
         fornecedores=query_all("SELECT * FROM fornecedores ORDER BY nome"),
+        obras=query_all("SELECT * FROM obras ORDER BY descricao"),
         status_list=STATUS_PEDIDO,
         filtros=dict(
             secretaria_id=secretaria_id, unidade_id=unidade_id, fornecedor_id=fornecedor_id,
-            status=status, responsavel=responsavel, data_inicio=data_inicio, data_fim=data_fim,
+            obra_id=obra_id, status=status, responsavel=responsavel, data_inicio=data_inicio, data_fim=data_fim,
         ),
     )
 
@@ -117,6 +135,8 @@ def novo():
         fornecedor_id = request.form.get("fornecedor_id") or None
         data_pedido = request.form.get("data_pedido")
         responsavel = request.form.get("responsavel", "").strip()
+        obra_id = request.form.get("obra_id") or None
+        solicitacao_id = request.form.get("solicitacao_id") or None
         confirmado = request.form.get("confirmar_duplicidade") == "1"
 
         if not confirmado:
@@ -130,14 +150,15 @@ def novo():
                     f"novamente, ou confirme para salvar mesmo assim.",
                     "warning",
                 )
-                ctx = _form_context(pedido=request.form, itens=itens)
+                ctx = _form_context(pedido=request.form, itens=itens, obra_id_prefill=obra_id, solicitacao_id_prefill=solicitacao_id)
                 ctx["duplicado"] = True
                 return render_template("pedidos_compra/form.html", **ctx)
 
         pedido_id = execute(
             """INSERT INTO pedidos_compra (numero_pedido, data_pedido, secretaria_id, unidade_id,
-               fornecedor_id, responsavel, status, previsao_entrega, observacoes, criado_por)
-               VALUES (?, ?, ?, ?, ?, ?, 'Em Elaboração', ?, ?, ?)""",
+               fornecedor_id, responsavel, status, previsao_entrega, observacoes, obra_id,
+               solicitacao_id, criado_por)
+               VALUES (?, ?, ?, ?, ?, ?, 'Em Elaboração', ?, ?, ?, ?, ?)""",
             (
                 gerar_numero_pedido(),
                 data_pedido,
@@ -147,19 +168,43 @@ def novo():
                 responsavel,
                 request.form.get("previsao_entrega") or None,
                 request.form.get("observacoes", "").strip(),
+                obra_id,
+                solicitacao_id,
                 g.user["id"],
             ),
         )
         for item in itens:
             execute(
                 """INSERT INTO pedidos_compra_itens (pedido_id, material_id, quantidade_solicitada,
-                   valor_unitario, observacoes) VALUES (?, ?, ?, ?, ?)""",
-                (pedido_id, item["material_id"], item["quantidade_solicitada"], item["valor_unitario"], item["observacoes"]),
+                   valor_unitario, observacoes, solicitacao_item_id) VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    pedido_id, item["material_id"], item["quantidade_solicitada"],
+                    item["valor_unitario"], item["observacoes"], item["solicitacao_item_id"],
+                ),
             )
         flash("Pedido de compra cadastrado com sucesso.", "success")
         return redirect(url_for("pedidos_compra.detalhe", id=pedido_id))
 
-    return render_template("pedidos_compra/form.html", **_form_context())
+    obra_id_prefill = request.args.get("obra_id", type=int)
+    solicitacao_id_prefill = request.args.get("solicitacao_id", type=int)
+    itens_prefill = []
+    if solicitacao_id_prefill:
+        for i in itens_solicitacao(solicitacao_id_prefill):
+            if i["quantidade_pendente"] > 0:
+                itens_prefill.append(
+                    {
+                        "material_id": i["material_id"],
+                        "material_nome": i["material_nome"],
+                        "quantidade_solicitada": i["quantidade_pendente"],
+                        "valor_unitario": 0,
+                        "observacoes": "",
+                        "solicitacao_item_id": i["id"],
+                    }
+                )
+    return render_template(
+        "pedidos_compra/form.html",
+        **_form_context(itens=itens_prefill, obra_id_prefill=obra_id_prefill, solicitacao_id_prefill=solicitacao_id_prefill),
+    )
 
 
 @bp.route("/<int:id>")
@@ -167,12 +212,15 @@ def novo():
 def detalhe(id):
     pedido = query_one(
         """SELECT p.*, s.sigla AS secretaria_sigla, u.nome AS unidade_nome, f.nome AS fornecedor_nome,
-                  uc.nome AS criado_por_nome
+                  uc.nome AS criado_por_nome, o.descricao AS obra_descricao, o.codigo AS obra_codigo,
+                  sc.numero_solicitacao
            FROM pedidos_compra p
            LEFT JOIN secretarias s ON s.id = p.secretaria_id
            LEFT JOIN unidades u ON u.id = p.unidade_id
            LEFT JOIN fornecedores f ON f.id = p.fornecedor_id
            LEFT JOIN usuarios uc ON uc.id = p.criado_por
+           LEFT JOIN obras o ON o.id = p.obra_id
+           LEFT JOIN solicitacoes_compra sc ON sc.id = p.solicitacao_id
            WHERE p.id=?""",
         (id,),
     )
@@ -224,8 +272,11 @@ def editar(id):
         for item in itens:
             execute(
                 """INSERT INTO pedidos_compra_itens (pedido_id, material_id, quantidade_solicitada,
-                   valor_unitario, observacoes) VALUES (?, ?, ?, ?, ?)""",
-                (id, item["material_id"], item["quantidade_solicitada"], item["valor_unitario"], item["observacoes"]),
+                   valor_unitario, observacoes, solicitacao_item_id) VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    id, item["material_id"], item["quantidade_solicitada"],
+                    item["valor_unitario"], item["observacoes"], item["solicitacao_item_id"],
+                ),
             )
         flash("Pedido atualizado com sucesso.", "success")
         return redirect(url_for("pedidos_compra.detalhe", id=id))

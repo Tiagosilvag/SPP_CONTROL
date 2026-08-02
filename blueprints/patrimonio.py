@@ -4,7 +4,7 @@ from db import query_all, query_one, execute
 bp = Blueprint("patrimonio", __name__)
 
 ESTADOS = ["Ótimo", "Bom", "Regular", "Danificado"]
-STATUS_LIST = ["Disponível", "Em Uso", "Emprestado", "Manutenção"]
+STATUS_LIST = ["Disponível", "Em Uso", "Emprestado", "Manutenção", "Baixado"]
 
 
 @bp.route("/")
@@ -53,12 +53,13 @@ def listar():
 def detalhe(id):
     p = query_one(
         """SELECT p.*, m.nome AS material_nome, s.sigla AS secretaria_sigla, u.nome AS unidade_nome,
-                  uc.nome AS criado_por_nome
+                  uc.nome AS criado_por_nome, o.descricao AS obra_atual_descricao, o.codigo AS obra_atual_codigo
            FROM patrimonios p
            JOIN materiais m ON m.id = p.material_id
            LEFT JOIN secretarias s ON s.id = p.secretaria_proprietaria_id
            LEFT JOIN unidades u ON u.id = p.unidade_atual_id
            LEFT JOIN usuarios uc ON uc.id = p.criado_por
+           LEFT JOIN obras o ON o.id = p.obra_atual_id
            WHERE p.id=?""",
         (id,),
     )

@@ -10,6 +10,8 @@
       <div class="panel-title"><i class="bi bi-info-circle"></i> Dados do Pedido</div>
       <div class="row g-3">
         <div class="col-6 col-md-4"><div class="small text-muted">Status</div><span class="badge {{ badge.get(pedido.status, 'badge-soft-neutral') }}">{{ pedido.status }}</span></div>
+        <div class="col-6 col-md-4"><div class="small text-muted">Obra</div>{% if pedido.obra_descricao %}<a href="{{ url_for('obras.detalhe', id=pedido.obra_id) }}">{{ pedido.obra_codigo ~ ' - ' if pedido.obra_codigo }}{{ pedido.obra_descricao }}</a>{% else %}-{% endif %}</div>
+        {% if pedido.numero_solicitacao %}<div class="col-6 col-md-4"><div class="small text-muted">Solicitação Atendida</div><a href="{{ url_for('solicitacoes_compra.detalhe', id=pedido.solicitacao_id) }}">{{ pedido.numero_solicitacao }}</a></div>{% endif %}
         <div class="col-6 col-md-4"><div class="small text-muted">Data do Pedido</div>{{ pedido.data_pedido|brdate }}</div>
         <div class="col-6 col-md-4"><div class="small text-muted">Previsão de Entrega</div>{{ pedido.previsao_entrega|brdate }}</div>
         <div class="col-6 col-md-4"><div class="small text-muted">Secretaria</div>{{ pedido.secretaria_sigla or '-' }}</div>

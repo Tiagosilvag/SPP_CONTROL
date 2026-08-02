@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_row %}
+{% block content %}
+{% set status_badge = {'Em Andamento': 'badge-soft-warning', 'Concluída': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
+<div class="page-header">
+  <div class="d-flex align-items-start gap-3">
+    <span class="page-header-icon"><i class="bi bi-cone-striped"></i></span>
+    <div>
+      <h1 class="page-title">{{ obra.codigo ~ ' - ' if obra.codigo }}{{ obra.descricao }}</h1>
+      <div class="page-subtitle"><span class="badge {{ status_badge.get(obra.status, 'badge-soft-neutral') }}">{{ obra.status }}</span></div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('obras.editar', id=obra.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i> Editar Obra</a>
+    <a href="{{ url_for('obras.listar') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Todas as Obras</a>
+  </div>
+</div>
+
+<div class="panel mb-4">
+  <div class="row g-3">
+    <div class="col-6 col-md-3"><div class="stat-label">Responsável</div><div class="fw-semibold">{{ obra.fiscal_responsavel or '-' }}</div></div>
+    <div class="col-6 col-md-3"><div class="stat-label">Secretaria</div><div class="fw-semibold">{{ obra.secretaria_sigla or '-' }}</div></div>
+    <div class="col-6 col-md-3"><div class="stat-label">Unidade</div><div class="fw-semibold">{{ obra.unidade_nome or '-' }}</div></div>
+    <div class="col-6 col-md-3"><div class="stat-label">Início</div><div class="fw-semibold">{{ obra.data_inicio|brdate }}</div></div>
+    <div class="col-6 col-md-3"><div class="stat-label">Previsão de Conclusão</div><div class="fw-semibold">{{ obra.previsao_termino|brdate }}</div></div>
+    <div class="col-6 col-md-3"><div class="stat-label">Data de Conclusão</div><div class="fw-semibold">{{ obra.data_conclusao|brdate }}</div></div>
+    {% if obra.observacoes %}<div class="col-12"><div class="stat-label">Observações</div><div>{{ obra.observacoes }}</div></div>{% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('solicitacoes_compra.nova', obra_id=obra.id) }}" class="card-stat d-block text-decoration-none h-100">
+      <div class="stat-tile"><div><div class="stat-label">Ação Rápida</div><div class="fw-bold">Nova Solicitação de Compra</div></div><span class="stat-icon badge-soft-info"><i class="bi bi-clipboard-plus"></i></span></div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('pedidos_compra.novo', obra_id=obra.id) }}" class="card-stat d-block text-decoration-none h-100">
+      <div class="stat-tile"><div><div class="stat-label">Ação Rápida</div><div class="fw-bold">Novo Pedido de Compra</div></div><span class="stat-icon badge-soft-neutral"><i class="bi bi-cart4"></i></span></div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('pedidos_compra.listar', obra_id=obra.id) }}" class="card-stat d-block text-decoration-none h-100">
+      <div class="stat-tile"><div><div class="stat-label">Ação Rápida</div><div class="fw-bold">Baixa de Pedido</div></div><span class="stat-icon badge-soft-warning"><i class="bi bi-box-arrow-in-down"></i></span></div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('mov_patrimonio.nova', obra_id=obra.id, tipo='Transferência entre Obras') }}" class="card-stat d-block text-decoration-none h-100">
+      <div class="stat-tile"><div><div class="stat-label">Ação Rápida</div><div class="fw-bold">Movimentação Patrimonial</div></div><span class="stat-icon badge-soft-success"><i class="bi bi-arrow-repeat"></i></span></div>
+    </a>
+  </div>
+</div>
+
+<div class="panel mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="panel-title mb-0"><i class="bi bi-clipboard-data"></i> Materiais da Obra</div>
+    <a href="{{ url_for('obras.planejamento', id=obra.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Planejar Materiais</a>
+  </div>
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3"><div class="card-stat"><div class="stat-tile"><div><div class="stat-label">Itens Planejados</div><div class="stat-value">{{ resumo.total }}</div></div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card-stat"><div class="stat-tile"><div><div class="stat-label">OK</div><div class="stat-value text-success">{{ resumo.ok }}</div></div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card-stat"><div class="stat-tile"><div><div class="stat-label">Parciais</div><div class="stat-value text-warning">{{ resumo.parcial }}</div></div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card-stat"><div class="stat-tile"><div><div class="stat-label">Pendentes</div><div class="stat-value text-danger">{{ resumo.pendente }}</div></div></div></div></div>
+  </div>
+
+  <div class="fw-semibold small text-muted mb-2">CONSUMÍVEIS</div>
+  <div class="table-responsive mb-3">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Material</th><th>Prevista</th><th>Comprada</th><th>Entregue</th><th>Pendente</th><th>Situação</th></tr></thead>
+    <tbody>
+    {% for m in materiais_consumiveis %}
+      <tr>
+        <td>{{ m.material_nome }}</td>
+        <td>{{ m.quantidade_prevista|round(2) }} {{ m.unidade_medida }}</td>
+        <td>{{ m.quantidade_adquirida|round(2) }} {{ m.unidade_medida }}</td>
+        <td>{{ m.quantidade_entregue|round(2) }} {{ m.unidade_medida }}</td>
+        <td>{{ m.quantidade_pendente|round(2) }} {{ m.unidade_medida }}</td>
+        <td>{% set sbadge = {'OK': 'badge-soft-success', 'Parcialmente entregue': 'badge-soft-warning', 'Pendente': 'badge-soft-neutral'} %}<span class="badge {{ sbadge.get(m.situacao, 'badge-soft-neutral') }}">{{ m.situacao }}</span></td>
+      </tr>
+    {% else %}
+      {{ empty_row(6, 'Nenhum consumível planejado ainda.') }}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <div class="fw-semibold small text-muted mb-2">PATRIMONIAIS</div>
+  <div class="table-responsive">
+  <table class="table table-sm table-hover mb-0">
+    <thead><tr><th>Material</th><th>Prevista</th><th>Alocada</th><th>Pendente</th><th>Situação</th></tr></thead>
+    <tbody>
+    {% for m in materiais_patrimoniais %}
+      <tr>
+        <td>{{ m.material_nome }}</td>
+        <td>{{ m.quantidade_prevista|round(0) }}</td>
+        <td>{{ m.quantidade_entregue|round(0) }}</td>
+        <td>{{ m.quantidade_pendente|round(0) }}</td>
+        <td>{% set sbadge = {'OK': 'badge-soft-success', 'Parcialmente entregue': 'badge-soft-warning', 'Pendente': 'badge-soft-neutral'} %}<span class="badge {{ sbadge.get(m.situacao, 'badge-soft-neutral') }}">{{ m.situacao }}</span></td>
+      </tr>
+    {% else %}
+      {{ empty_row(5, 'Nenhum patrimonial planejado ainda.') }}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-clipboard-plus"></i> Solicitações de Compra Recentes</div>
+      {% if solicitacoes %}
+      <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Número</th><th>Data</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for s in solicitacoes %}
+          <tr><td><a href="{{ url_for('solicitacoes_compra.detalhe', id=s.id) }}">{{ s.numero_solicitacao }}</a></td><td>{{ s.data_solicitacao|brdate }}</td><td>{{ s.status }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <a href="{{ url_for('solicitacoes_compra.listar', obra_id=obra.id) }}" class="small d-inline-block mt-3">Ver todas <i class="bi bi-arrow-right"></i></a>
+      {% else %}
+      <div class="empty-state py-4"><i class="bi bi-inbox"></i><div class="empty-state-title">Nenhuma solicitação ainda</div></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-cart4"></i> Pedidos de Compra Recentes</div>
+      {% if pedidos %}
+      <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Número</th><th>Fornecedor</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for p in pedidos %}
+          <tr><td><a href="{{ url_for('pedidos_compra.detalhe', id=p.id) }}">{{ p.numero_pedido }}</a></td><td>{{ p.fornecedor_nome or '-' }}</td><td>{{ p.status }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <a href="{{ url_for('pedidos_compra.listar', obra_id=obra.id) }}" class="small d-inline-block mt-3">Ver todos <i class="bi bi-arrow-right"></i></a>
+      {% else %}
+      <div class="empty-state py-4"><i class="bi bi-inbox"></i><div class="empty-state-title">Nenhum pedido ainda</div></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-arrow-repeat"></i> Movimentações Patrimoniais Recentes</div>
+      {% if movimentacoes %}
+      <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Data</th><th>Tipo</th><th>Patrimônio</th></tr></thead>
+        <tbody>
+        {% for m in movimentacoes %}
+          <tr><td>{{ m.data_movimentacao|brdatetime }}</td><td>{{ m.tipo_movimentacao }}</td><td>{{ m.num_patrimonio }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <a href="{{ url_for('mov_patrimonio.listar', obra_id=obra.id) }}" class="small d-inline-block mt-3">Ver histórico completo <i class="bi bi-arrow-right"></i></a>
+      {% else %}
+      <div class="empty-state py-4"><i class="bi bi-inbox"></i><div class="empty-state-title">Nenhuma movimentação ainda</div></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel h-100">
+      <div class="panel-title"><i class="bi bi-tools"></i> Patrimônios Alocados nesta Obra</div>
+      {% if patrimonios_alocados %}
+      <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Nº Patrimônio</th><th>Material</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for p in patrimonios_alocados %}
+          <tr><td><a href="{{ url_for('patrimonio.detalhe', id=p.id) }}">{{ p.num_patrimonio }}</a></td><td>{{ p.material_nome }}</td><td>{{ p.status }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <div class="empty-state py-4"><i class="bi bi-inbox"></i><div class="empty-state-title">Nenhum bem alocado nesta obra</div></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

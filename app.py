@@ -3,6 +3,7 @@ from config import Config
 import db as db_module
 from auth import load_logged_in_user
 from permissoes import MENU_CHAVES, menu_permitido
+from services_obras import obras_agrupadas_por_status
 
 
 def create_app():
@@ -36,6 +37,7 @@ def create_app():
     from blueprints.mov_patrimonio import bp as mov_patrimonio_bp
     from blueprints.estoque import bp as estoque_bp
     from blueprints.cotacoes import bp as cotacoes_bp
+    from blueprints.solicitacoes_compra import bp as solicitacoes_compra_bp
     from blueprints.pedidos_compra import bp as pedidos_compra_bp
     from blueprints.licitacoes import bp as licitacoes_bp
     from blueprints.relatorios import bp as relatorios_bp
@@ -61,6 +63,7 @@ def create_app():
     app.register_blueprint(mov_consumiveis_bp, url_prefix="/movimentacoes-consumiveis")
     app.register_blueprint(mov_patrimonio_bp, url_prefix="/movimentacoes-patrimonio")
     app.register_blueprint(estoque_bp, url_prefix="/estoque")
+    app.register_blueprint(solicitacoes_compra_bp, url_prefix="/solicitacoes-compra")
     app.register_blueprint(pedidos_compra_bp, url_prefix="/pedidos-compra")
     app.register_blueprint(licitacoes_bp, url_prefix="/licitacoes")
 
@@ -101,12 +104,14 @@ def create_app():
     def inject_globals():
         from datetime import date, datetime
 
+        usuario_logado = g.get("user") if g else None
         return {
             "sistema_nome": app.config["SISTEMA_NOME"],
             "hoje": date.today().isoformat(),
             "agora": datetime.now().strftime("%Y-%m-%dT%H:%M"),
-            "current_user": g.get("user") if g else None,
-            "menu_permitido": lambda chave: menu_permitido(g.get("user"), chave),
+            "current_user": usuario_logado,
+            "menu_permitido": lambda chave: menu_permitido(usuario_logado, chave),
+            "obras_por_status": obras_agrupadas_por_status() if usuario_logado else {},
         }
 
     @app.template_filter("brdate")
