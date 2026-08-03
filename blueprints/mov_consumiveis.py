@@ -96,6 +96,8 @@ def nova():
         elif tipo == "Devolução":
             status_devolucao = "Devolvido"
 
+        obra_origem_id = request.form.get("obra_origem_id") or None
+
         execute(
             """INSERT INTO movimentacoes_consumiveis
                (data_movimentacao, tipo_movimentacao, material_id, quantidade, unidade_origem_id,
@@ -110,8 +112,8 @@ def nova():
                 request.form.get("unidade_origem_id") or None,
                 request.form.get("unidade_destino_id") or None,
                 secretaria_id,
-                request.form.get("obra_id") or None,
-                request.form.get("obra_origem_id") or None,
+                obra_origem_id,
+                obra_origem_id,
                 request.form.get("obra_destino_id") or None,
                 request.form.get("data_prev_devolucao") or None,
                 request.form.get("data_real_devolucao") or None,

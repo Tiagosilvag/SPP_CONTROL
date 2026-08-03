@@ -22,7 +22,7 @@
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">Secretaria Proprietária</label>
-      <select class="form-select" name="secretaria_proprietaria_id">
+      <select class="form-select" name="secretaria_proprietaria_id" id="secretaria_proprietaria_id">
         <option value="">Selecione...</option>
         {% for s in secretarias %}
         <option value="{{ s.id }}" {% if p and p.secretaria_proprietaria_id==s.id %}selected{% endif %}>{{ s.sigla }} - {{ s.nome }}</option>
@@ -31,10 +31,10 @@
     </div>
     <div class="col-md-6 mb-3">
       <label class="form-label">Unidade Atual</label>
-      <select class="form-select" name="unidade_atual_id">
+      <select class="form-select" name="unidade_atual_id" data-fill-secretaria="#secretaria_proprietaria_id">
         <option value="">Selecione...</option>
         {% for u in unidades %}
-        <option value="{{ u.id }}" {% if p and p.unidade_atual_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
+        <option value="{{ u.id }}" data-secretaria-id="{{ u.secretaria_id or '' }}" {% if p and p.unidade_atual_id==u.id %}selected{% endif %}>{{ u.nome }}</option>
         {% endfor %}
       </select>
     </div>

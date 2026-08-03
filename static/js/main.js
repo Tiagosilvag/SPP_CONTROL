@@ -97,6 +97,21 @@
     });
   });
 
+  /* ---------- Auto-preenchimento de Secretaria a partir de Unidade/Patrimônio ----------
+     Um <select> com data-fill-secretaria="#id-do-select-secretaria" preenche esse campo
+     sozinho quando muda, usando o data-secretaria-id de cada <option> selecionada. */
+  document.querySelectorAll("[data-fill-secretaria]").forEach(function (source) {
+    var target = document.querySelector(source.getAttribute("data-fill-secretaria"));
+    if (!target) return;
+    source.addEventListener("change", function () {
+      var opt = source.options[source.selectedIndex];
+      var secretariaId = opt ? opt.getAttribute("data-secretaria-id") : "";
+      if (secretariaId) {
+        target.value = secretariaId;
+      }
+    });
+  });
+
   /* ---------- Auto-dismiss flash alerts ---------- */
   document.querySelectorAll(".alert-stack .alert").forEach(function (alertEl) {
     setTimeout(function () {

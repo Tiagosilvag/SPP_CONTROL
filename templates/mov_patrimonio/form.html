@@ -26,17 +26,17 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Bem Patrimonial</label>
-    <select class="form-select" name="patrimonio_id" required>
+    <select class="form-select" name="patrimonio_id" required data-fill-secretaria="#secretaria_proprietaria_id">
       <option value="">Selecione...</option>
       {% for p in patrimonios %}
-      <option value="{{ p.id }}">{{ p.num_patrimonio }} — {{ p.material_nome }} ({{ p.status }})</option>
+      <option value="{{ p.id }}" data-secretaria-id="{{ p.secretaria_proprietaria_id or '' }}">{{ p.num_patrimonio }} — {{ p.material_nome }} ({{ p.status }})</option>
       {% endfor %}
     </select>
   </div>
   <div class="row">
     <div class="col-md-4 mb-3">
       <label class="form-label">Secretaria Proprietária</label>
-      <select class="form-select" name="secretaria_proprietaria_id">
+      <select class="form-select" name="secretaria_proprietaria_id" id="secretaria_proprietaria_id">
         <option value="">Selecione...</option>
         {% for s in secretarias %}
         <option value="{{ s.id }}">{{ s.sigla }} - {{ s.nome }}</option>
@@ -45,35 +45,25 @@
     </div>
     <div class="col-md-4 mb-3">
       <label class="form-label">Unidade Origem</label>
-      <select class="form-select" name="unidade_origem_id">
+      <select class="form-select" name="unidade_origem_id" data-fill-secretaria="#secretaria_proprietaria_id">
         <option value="">Selecione...</option>
         {% for u in unidades %}
-        <option value="{{ u.id }}">{{ u.nome }}</option>
+        <option value="{{ u.id }}" data-secretaria-id="{{ u.secretaria_id or '' }}">{{ u.nome }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="col-md-4 mb-3">
       <label class="form-label">Unidade Destino</label>
-      <select class="form-select" name="unidade_destino_id">
+      <select class="form-select" name="unidade_destino_id" data-fill-secretaria="#secretaria_proprietaria_id">
         <option value="">Selecione...</option>
         {% for u in unidades %}
-        <option value="{{ u.id }}">{{ u.nome }}</option>
+        <option value="{{ u.id }}" data-secretaria-id="{{ u.secretaria_id or '' }}">{{ u.nome }}</option>
         {% endfor %}
       </select>
     </div>
   </div>
 
-  <div class="mb-3">
-    <label class="form-label">Obra (opcional)</label>
-    <select class="form-select" name="obra_id">
-      <option value="">Nenhuma</option>
-      {% for o in obras %}
-      <option value="{{ o.id }}" {% if obra_id_prefill and (obra_id_prefill|string)==(o.id|string) %}selected{% endif %}>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <div id="obras-fields" class="row" style="display:none;">
+  <div id="obras-fields" class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">Obra de Origem</label>
       <select class="form-select" name="obra_origem_id">
@@ -120,7 +110,6 @@
 function toggleCampos() {
   const tipo = document.getElementById('tipo_movimentacao').value;
   document.getElementById('devolucao-fields').style.display = (tipo === 'Empréstimo' || tipo === 'Devolução') ? 'flex' : 'none';
-  document.getElementById('obras-fields').style.display = (tipo === 'Transferência entre Obras') ? 'flex' : 'none';
 }
 document.addEventListener('DOMContentLoaded', toggleCampos);
 </script>

@@ -91,6 +91,8 @@ def nova():
             flash(f'Este bem não está emprestado/em uso (status atual: {patrimonio["status"]}).', "danger")
             return redirect(url_for("mov_patrimonio.nova"))
 
+        obra_origem_id = request.form.get("obra_origem_id") or None
+
         mov_id = execute(
             """INSERT INTO movimentacoes_patrimonio
                (data_movimentacao, tipo_movimentacao, patrimonio_id, secretaria_proprietaria_id,
@@ -104,8 +106,8 @@ def nova():
                 request.form.get("secretaria_proprietaria_id") or None,
                 request.form.get("unidade_origem_id") or None,
                 request.form.get("unidade_destino_id") or None,
-                request.form.get("obra_id") or None,
-                request.form.get("obra_origem_id") or None,
+                obra_origem_id,
+                obra_origem_id,
                 request.form.get("obra_destino_id") or None,
                 request.form.get("data_prev_devolucao") or None,
                 request.form.get("data_real_devolucao") or None,
