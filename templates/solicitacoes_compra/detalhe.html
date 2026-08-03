@@ -4,6 +4,10 @@
 {% set badge = {'Aberta': 'badge-soft-info', 'Parcialmente Atendida': 'badge-soft-warning', 'Atendida': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
 {{ page_header('bi-clipboard-plus', solicitacao.numero_solicitacao, subtitle='Solicitação de compra — ' ~ solicitacao.status) }}
 
+<div class="d-flex gap-2 mb-3">
+  <a href="{{ url_for('obras.detalhe', id=solicitacao.obra_id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
+</div>
+
 <div class="row g-3 mb-3">
   <div class="col-md-8">
     <div class="panel h-100">

@@ -3,6 +3,12 @@
 {% block content %}
 {{ page_header('bi-arrow-repeat', 'Nova Movimentação de Patrimônio') }}
 
+{% if obra_id_prefill %}
+<div class="d-flex gap-2 mb-3">
+  <a href="{{ url_for('obras.detalhe', id=obra_id_prefill) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
+</div>
+{% endif %}
+
 <form method="post" class="surface-card form-card p-4">
   <div class="row">
     <div class="col-md-6 mb-3">

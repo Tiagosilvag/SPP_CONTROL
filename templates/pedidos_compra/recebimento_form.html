@@ -3,6 +3,12 @@
 {% block content %}
 {{ page_header('bi-box-arrow-in-down', 'Registrar Recebimento', subtitle='Pedido ' ~ pedido.numero_pedido) }}
 
+{% if pedido.obra_id %}
+<div class="d-flex gap-2 mb-3">
+  <a href="{{ url_for('obras.detalhe', id=pedido.obra_id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
+</div>
+{% endif %}
+
 <form method="post" class="surface-card p-4">
   <div class="row">
     <div class="col-md-4 mb-3">
