@@ -1,6 +1,6 @@
 {# Reusable Jinja2 components shared across pages. Presentational only — no business logic. #}
 
-{% macro page_header(icon, title, subtitle=None, action_url=None, action_label=None, action_icon='bi-plus-lg') %}
+{% macro page_header(icon, title, subtitle=None, action_url=None, action_label=None, action_icon='bi-plus-lg', back_url=None, back_label='Voltar') %}
 <div class="page-header">
   <div class="d-flex align-items-start gap-3">
     <span class="page-header-icon"><i class="bi {{ icon }}"></i></span>
@@ -9,9 +9,14 @@
       {% if subtitle %}<div class="page-subtitle">{{ subtitle }}</div>{% endif %}
     </div>
   </div>
-  {% if action_url %}
-  <a href="{{ action_url }}" class="btn btn-primary"><i class="bi {{ action_icon }}"></i> {{ action_label }}</a>
-  {% endif %}
+  <div class="d-flex gap-2">
+    {% if back_url %}
+    <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> {{ back_label }}</a>
+    {% endif %}
+    {% if action_url %}
+    <a href="{{ action_url }}" class="btn btn-primary"><i class="bi {{ action_icon }}"></i> {{ action_label }}</a>
+    {% endif %}
+  </div>
 </div>
 {% endmacro %}
 

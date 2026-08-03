@@ -1,13 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import page_header, empty_row %}
 {% block content %}
-{{ page_header('bi-cart4', 'Pedidos de Compra', subtitle='Solicitações de compra, recebimento parcial e saldo pendente.', action_url=url_for('pedidos_compra.novo'), action_label='Novo Pedido') }}
-
-{% if filtros.obra_id %}
-<div class="d-flex gap-2 mb-3">
-  <a href="{{ url_for('obras.detalhe', id=filtros.obra_id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
-</div>
-{% endif %}
+{{ page_header('bi-cart4', 'Pedidos de Compra', subtitle='Solicitações de compra, recebimento parcial e saldo pendente.', action_url=url_for('pedidos_compra.novo'), action_label='Novo Pedido', back_url=(url_for('obras.detalhe', id=filtros.obra_id) if filtros.obra_id else None), back_label='Voltar para a Obra') }}
 
 <div class="row g-3 mb-3">
   <div class="col-6 col-md-3">

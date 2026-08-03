@@ -2,13 +2,7 @@
 {% from "_macros.html" import page_header, empty_row %}
 {% block content %}
 {% set badge = {'Em Elaboração': 'badge-soft-neutral', 'Enviado': 'badge-soft-info', 'Parcialmente Recebido': 'badge-soft-warning', 'Recebido': 'badge-soft-success', 'Cancelado': 'badge-soft-danger'} %}
-{{ page_header('bi-cart4', pedido.numero_pedido, subtitle='Pedido de compra — ' ~ pedido.status) }}
-
-{% if pedido.obra_id %}
-<div class="d-flex gap-2 mb-3">
-  <a href="{{ url_for('obras.detalhe', id=pedido.obra_id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
-</div>
-{% endif %}
+{{ page_header('bi-cart4', pedido.numero_pedido, subtitle='Pedido de compra — ' ~ pedido.status, back_url=(url_for('obras.detalhe', id=pedido.obra_id) if pedido.obra_id else None), back_label='Voltar para a Obra') }}
 
 <div class="row g-3 mb-3">
   <div class="col-md-8">

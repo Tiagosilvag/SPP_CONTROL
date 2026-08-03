@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import page_header, empty_row %}
 {% block content %}
-{{ page_header('bi-clipboard-data', 'Planejamento de Materiais', subtitle='Obra: ' ~ (obra.codigo ~ ' - ' if obra.codigo else '') ~ obra.descricao) }}
-
-<div class="d-flex gap-2 mb-3">
-  <a href="{{ url_for('obras.detalhe', id=obra.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
-</div>
+{{ page_header('bi-clipboard-data', 'Planejamento de Materiais', subtitle='Obra: ' ~ (obra.codigo ~ ' - ' if obra.codigo else '') ~ obra.descricao, back_url=url_for('obras.detalhe', id=obra.id), back_label='Voltar para a Obra') }}
 
 <div class="surface-card p-4 mb-4">
   <div class="form-section-title">Adicionar Material ao Planejamento</div>

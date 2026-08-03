@@ -1,13 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import page_header, form_actions %}
 {% block content %}
-{{ page_header('bi-clipboard-plus', 'Nova Solicitação de Compra') }}
-
-{% if obra_id_prefill %}
-<div class="d-flex gap-2 mb-3">
-  <a href="{{ url_for('obras.detalhe', id=obra_id_prefill) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Voltar para a Obra</a>
-</div>
-{% endif %}
+{{ page_header('bi-clipboard-plus', 'Nova Solicitação de Compra', back_url=(url_for('obras.detalhe', id=obra_id_prefill) if obra_id_prefill else None), back_label='Voltar para a Obra') }}
 
 <form method="post" class="surface-card p-4">
   <div class="form-section-title">Dados da Solicitação</div>
