@@ -3,7 +3,6 @@ from config import Config
 import db as db_module
 from auth import load_logged_in_user
 from permissoes import MENU_CHAVES, menu_permitido
-from services_obras import obras_agrupadas_por_status
 
 
 def create_app():
@@ -111,7 +110,6 @@ def create_app():
             "agora": datetime.now().strftime("%Y-%m-%dT%H:%M"),
             "current_user": usuario_logado,
             "menu_permitido": lambda chave: menu_permitido(usuario_logado, chave),
-            "obras_por_status": obras_agrupadas_por_status() if usuario_logado else {},
         }
 
     @app.template_filter("brdate")

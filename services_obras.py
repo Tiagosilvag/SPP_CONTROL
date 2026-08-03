@@ -1,20 +1,11 @@
 """
-Regras de negócio da Obra como entidade central do sistema: agrupamento
-para o menu lateral e cálculo do painel de materiais (planejado x
-adquirido x entregue x pendente x situação).
+Regras de negócio da Obra como entidade central do sistema: cálculo do
+painel de materiais (planejado x adquirido x entregue x pendente x
+situação).
 """
 from db import query_all, query_one, execute
 
 STATUS_OBRA = ["Em Andamento", "Concluída", "Cancelada"]
-
-
-def obras_agrupadas_por_status():
-    """Usado pelo menu lateral: todas as obras, já separadas por status."""
-    obras = query_all("SELECT id, codigo, descricao, status FROM obras ORDER BY descricao")
-    grupos = {status: [] for status in STATUS_OBRA}
-    for o in obras:
-        grupos.setdefault(o["status"], []).append(o)
-    return grupos
 
 
 def _situacao(previsto, entregue):

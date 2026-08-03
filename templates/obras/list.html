@@ -32,41 +32,25 @@
   </form>
 </div>
 
-<div class="table-card">
-<div class="table-responsive">
-<table class="table table-hover align-middle mb-0">
-  <thead>
-    <tr><th>Código</th><th>Descrição</th><th>Secretaria</th><th>Unidade</th><th>Início</th><th>Previsão</th><th>Status</th><th>Cadastrado por</th><th class="text-end">Ações</th></tr>
-  </thead>
-  <tbody>
-    {% for o in obras %}
-    <tr>
-      <td>{{ o.codigo or '-' }}</td>
-      <td><a href="{{ url_for('obras.detalhe', id=o.id) }}" class="fw-semibold">{{ o.descricao }}</a></td>
-      <td>{{ o.secretaria_sigla or '-' }}</td>
-      <td>{{ o.unidade_nome or '-' }}</td>
-      <td>{{ o.data_inicio|brdate }}</td>
-      <td>{{ o.previsao_termino|brdate }}</td>
-      <td>
-        {% set badge = {'Em Andamento': 'badge-soft-warning', 'Concluída': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
-        <span class="badge {{ badge.get(o.status, 'badge-soft-neutral') }}">{{ o.status }}</span>
-      </td>
-      <td class="text-muted small">{{ o.criado_por_nome or '-' }}</td>
-      <td class="text-end">
-        <div class="row-actions">
-          <a href="{{ url_for('obras.detalhe', id=o.id) }}" class="btn btn-sm btn-outline-primary" title="Abrir painel da obra"><i class="bi bi-eye"></i></a>
-          <a href="{{ url_for('obras.editar', id=o.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
-          <form action="{{ url_for('obras.excluir', id=o.id) }}" method="post" data-confirm="Confirma a exclusão desta obra?">
-            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
-          </form>
-        </div>
-      </td>
-    </tr>
-    {% else %}
-    {{ empty_row(9, 'Nenhuma obra cadastrada.', 'bi-cone-striped') }}
-    {% endfor %}
-  </tbody>
-</table>
-</div>
+{% set status_badge = {'Em Andamento': 'badge-soft-warning', 'Concluída': 'badge-soft-success', 'Cancelada': 'badge-soft-danger'} %}
+<div class="row g-3">
+  {% for o in obras %}
+  <div class="col-6 col-md-4 col-xl-3">
+    <a href="{{ url_for('obras.detalhe', id=o.id) }}" class="surface-card d-block p-3 text-decoration-none h-100">
+      <span class="module-card-icon badge-soft-info d-inline-flex align-items-center justify-content-center mb-2" style="width:42px;height:42px;border-radius:12px;">
+        <i class="bi bi-cone-striped"></i>
+      </span>
+      <div class="fw-semibold text-body">{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</div>
+      <div class="mt-2"><span class="badge {{ status_badge.get(o.status, 'badge-soft-neutral') }}">{{ o.status }}</span></div>
+    </a>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="empty-state py-5">
+      <i class="bi bi-cone-striped"></i>
+      <div class="empty-state-title">Nenhuma obra cadastrada.</div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}

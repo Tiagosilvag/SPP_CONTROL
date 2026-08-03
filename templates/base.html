@@ -50,7 +50,6 @@
 {% set compras_blueprints = ['solicitacoes_compra', 'pedidos_compra', 'licitacoes'] %}
 {% set cadastros_blueprints = ['secretarias', 'unidades', 'materiais', 'fornecedores'] %}
 {% set auditoria_blueprints = ['dashboard', 'relatorios', 'auditoria', 'usuarios', 'permissoes'] %}
-{% set obras_open = request.blueprint == 'obras' %}
 {% set movimentacoes_open = request.blueprint in movimentacoes_blueprints %}
 {% set estoque_open = request.blueprint in estoque_blueprints %}
 {% set compras_open = request.blueprint in compras_blueprints %}
@@ -81,24 +80,7 @@
       {% else %}
       <ul class="nav flex-column">
         {% if menu_permitido('obras') %}
-        <li class="nav-group">
-          <button type="button" class="nav-group-toggle {{ 'has-active' if obras_open }}" data-bs-toggle="collapse" data-bs-target="#nav-group-obras" aria-expanded="{{ 'true' if obras_open else 'false' }}">
-            <i class="bi bi-cone-striped"></i><span>Obras</span><i class="bi bi-chevron-down nav-group-caret"></i>
-          </button>
-          <div class="collapse {{ 'show' if obras_open }}" id="nav-group-obras">
-            <ul class="nav flex-column nav-group-items">
-              <li class="nav-item"><a href="{{ url_for('obras.listar') }}" class="nav-link {{ 'active' if request.endpoint=='obras.listar' }}"><i class="bi bi-list-ul"></i>Ver todas / Nova Obra</a></li>
-              {% for status_nome, lista in (obras_por_status or {}).items() %}
-                {% if lista %}
-                <li><span class="nav-section-title" style="padding-left: 0.6rem;">{{ status_nome }}</span></li>
-                {% for o in lista %}
-                <li class="nav-item"><a href="{{ url_for('obras.detalhe', id=o.id) }}" class="nav-link {{ 'active' if request.blueprint=='obras' and request.view_args and request.view_args.get('id')==o.id }}" title="{{ o.descricao }}"><i class="bi bi-dot"></i>{{ o.codigo ~ ' - ' if o.codigo }}{{ o.descricao }}</a></li>
-                {% endfor %}
-                {% endif %}
-              {% endfor %}
-            </ul>
-          </div>
-        </li>
+        <li class="nav-item"><a href="{{ url_for('obras.listar') }}" class="nav-link {{ 'active' if request.blueprint=='obras' }}"><i class="bi bi-cone-striped"></i>Obras</a></li>
         {% endif %}
 
         {% if menu_permitido('mov_consumiveis') or menu_permitido('mov_patrimonio') %}
